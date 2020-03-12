@@ -204,8 +204,6 @@ static int handle_script (lua_State *L, char **argv) {
 
 /* bits of various argument indicators in 'args' */
 #define has_error	1	/* bad option */
-#define has_i		2	/* -i */
-#define has_v		4	/* -v */
 #define has_e		8	/* -e */
 #define has_E		16	/* -E */
 
@@ -242,11 +240,6 @@ static int collectargs (char **argv, int *first) {
         break;
       case 'i':
         args |= has_i;  /* (-i implies -v) *//* FALLTHROUGH */
-      case 'v':
-        if (argv[i][2] != '\0')  /* extra characters? */
-          return has_error;  /* invalid option */
-        args |= has_v;
-        break;
       case 'e':
         args |= has_e;  /* FALLTHROUGH */
       case 'l':  /* both options need an argument */
@@ -256,8 +249,6 @@ static int collectargs (char **argv, int *first) {
             return has_error;  /* no next argument or it is another option */
         }
         break;
-      default:  /* invalid option */
-        return has_error;
     }
   }
   *first = i;  /* no script name */
@@ -309,41 +300,6 @@ static int handle_luainit (lua_State *L) {
   else
     return dostring(L, init, name);
 }
-
-
-/*
-** {==================================================================
-** Read-Eval-Print Loop (REPL)
-** ===================================================================
-*/
-
-#if !defined(LUA_PROMPT)
-#define LUA_PROMPT		"> "
-#define LUA_PROMPT2		">> "
-#endif
-
-#if !defined(LUA_MAXINPUT)
-#define LUA_MAXINPUT		512
-#endif
-
-
-/*
-** lua_readline defines how to show a prompt and then read a line from
-** the standard input.
-** lua_freeline defines how to free a line read by lua_readline.
-*/
-#if !defined(lua_readline)	/* { */
-
-#define lua_readline(L,b,p) \
-        ((void)L, fputs(p, stdout), fflush(stdout),  /* show prompt */ \
-        fgets(b, LUA_MAXINPUT, stdin) != NULL)  /* get line */
-#define lua_freeline(L,b)	{ (void)L; (void)b; }
-
-#endif				/* } */
-
-/* mark in error messages for incomplete statements */
-#define EOFMARK		"<eof>"
-#define marklen		(sizeof(EOFMARK)/sizeof(char) - 1)
 
 /* }================================================================== */
 
