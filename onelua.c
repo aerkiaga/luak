@@ -15,7 +15,6 @@
 /* some of these may need extra libraries such as -ldl -lreadline -lncurses */
 #if 0
 #define LUA_USE_LINUX
-#define LUA_USE_MACOSX
 #define LUA_USE_POSIX
 #define LUA_ANSI
 #endif
