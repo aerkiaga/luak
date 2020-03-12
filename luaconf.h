@@ -59,20 +59,6 @@
 /* #define LUA_USE_C89 */
 
 
-/*
-** By default, Lua on Windows use (some) specific Windows features
-*/
-#if !defined(LUA_USE_C89) && defined(_WIN32) && !defined(_WIN32_WCE)
-#define LUA_USE_WINDOWS  /* enable goodies for regular Windows */
-#endif
-
-
-#if defined(LUA_USE_WINDOWS)
-#define LUA_DL_DLL	/* enable support for DLL */
-#define LUA_USE_C89	/* broadly, Windows is C89 */
-#endif
-
-
 #if defined(LUA_USE_LINUX)
 #define LUA_USE_POSIX
 #define LUA_USE_DLOPEN		/* needs an extra library: -ldl */
@@ -111,7 +97,7 @@
 ** C89 ('long' and 'double'); Windows always has '__int64', so it does
 ** not need to use this case.
 */
-#if defined(LUA_USE_C89) && !defined(LUA_USE_WINDOWS)
+#if defined(LUA_USE_C89)
 #define LUA_C89_NUMBERS
 #endif
 
@@ -559,17 +545,6 @@
 
 #define LUA_MAXUNSIGNED		ULLONG_MAX
 
-#elif defined(LUA_USE_WINDOWS) /* }{ */
-/* in Windows, can use specific Windows types */
-
-#define LUA_INTEGER		__int64
-#define LUA_INTEGER_FRMLEN	"I64"
-
-#define LUA_MAXINTEGER		_I64_MAX
-#define LUA_MININTEGER		_I64_MIN
-
-#define LUA_MAXUNSIGNED		_UI64_MAX
-
 #else				/* }{ */
 
 #error "Compiler does not support 'long long'. Use option '-DLUA_32BITS' \
@@ -773,4 +748,3 @@
 
 
 #endif
-

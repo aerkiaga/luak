@@ -40,9 +40,7 @@
 #define L_STRFTIMEWIN "aAbBcdHIjmMpSUwWxXyYzZ%" \
     "||" "#c#x#d#H#I#j#m#M#S#U#w#W#y#Y"  /* two-char options */
 
-#if defined(LUA_USE_WINDOWS)
-#define LUA_STRFTIMEOPTIONS	L_STRFTIMEWIN
-#elif defined(LUA_USE_C89)
+#if defined(LUA_USE_C89)
 #define LUA_STRFTIMEOPTIONS	L_STRFTIMEC89
 #else  /* C99 specification */
 #define LUA_STRFTIMEOPTIONS	L_STRFTIMEC99
@@ -425,4 +423,3 @@ LUAMOD_API int luaopen_os (lua_State *L) {
   luaL_newlib(L, syslib);
   return 1;
 }
-

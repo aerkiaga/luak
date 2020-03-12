@@ -59,11 +59,6 @@ static int l_checkmode (const char *mode) {
 #define l_popen(L,c,m)		(fflush(NULL), popen(c,m))
 #define l_pclose(L,file)	(pclose(file))
 
-#elif defined(LUA_USE_WINDOWS)	/* }{ */
-
-#define l_popen(L,c,m)		(_popen(c,m))
-#define l_pclose(L,file)	(_pclose(file))
-
 #else				/* }{ */
 
 /* ISO C definitions */
@@ -110,14 +105,6 @@ static int l_checkmode (const char *mode) {
 #define l_fseek(f,o,w)		fseeko(f,o,w)
 #define l_ftell(f)		ftello(f)
 #define l_seeknum		off_t
-
-#elif defined(LUA_USE_WINDOWS) && !defined(_CRTIMP_TYPEINFO) \
-   && defined(_MSC_VER) && (_MSC_VER >= 1400)	/* }{ */
-
-/* Windows (but not DDK) and Visual C++ 2005 or higher */
-#define l_fseek(f,o,w)		_fseeki64(f,o,w)
-#define l_ftell(f)		_ftelli64(f)
-#define l_seeknum		__int64
 
 #else				/* }{ */
 
@@ -810,4 +797,3 @@ LUAMOD_API int luaopen_io (lua_State *L) {
   createstdfile(L, stderr, NULL, "stderr");
   return 1;
 }
-
