@@ -391,25 +391,12 @@ static int handle_luainit (lua_State *L) {
 */
 #if !defined(lua_readline)	/* { */
 
-#if defined(LUA_USE_READLINE)	/* { */
-
-#include <readline/readline.h>
-#include <readline/history.h>
-#define lua_initreadline(L)	((void)L, rl_readline_name="lua")
-#define lua_readline(L,b,p)	((void)L, ((b)=readline(p)) != NULL)
-#define lua_saveline(L,line)	((void)L, add_history(line))
-#define lua_freeline(L,b)	((void)L, free(b))
-
-#else				/* }{ */
-
 #define lua_initreadline(L)  ((void)L)
 #define lua_readline(L,b,p) \
         ((void)L, fputs(p, stdout), fflush(stdout),  /* show prompt */ \
         fgets(b, LUA_MAXINPUT, stdin) != NULL)  /* get line */
 #define lua_saveline(L,line)	{ (void)L; (void)line; }
 #define lua_freeline(L,b)	{ (void)L; (void)b; }
-
-#endif				/* } */
 
 #endif				/* } */
 
@@ -631,4 +618,3 @@ int main (int argc, char **argv) {
   lua_close(L);
   return (result && status == LUA_OK) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
-
