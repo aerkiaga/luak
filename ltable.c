@@ -908,17 +908,3 @@ lua_Unsigned luaH_getn (Table *t) {
   else  /* 'limit + 1' is also present */
     return hash_search(t, limit);
 }
-
-
-
-#if defined(LUA_DEBUG)
-
-/** export these functions for the test library */
-
-Node *luaH_mainposition (const Table *t, const TValue *key) {
-  return mainpositionTV(t, key);
-}
-
-int luaH_isdummy (const Table *t) { return isdummy(t); }
-
-#endif
