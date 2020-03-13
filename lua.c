@@ -222,13 +222,6 @@ static int collectargs (char **argv, int *first) {
     if (argv[i][0] != '-')  /* not an option? */
         return args;  /* stop handling options */
     switch (argv[i][1]) {  /* else check option */
-      case '-':  /* '--' */
-        if (argv[i][2] != '\0')  /* extra characters after '--'? */
-          return has_error;  /* invalid option */
-        *first = i + 1;
-        return args;
-      case '\0':  /* '-' */
-        return args;  /* script "name" is '-' */
       case 'E':
         if (argv[i][2] != '\0')  /* extra characters? */
           return has_error;  /* invalid option */
@@ -238,8 +231,6 @@ static int collectargs (char **argv, int *first) {
         if (argv[i][2] != '\0')  /* extra characters? */
           return has_error;  /* invalid option */
         break;
-      case 'i':
-        args |= has_i;  /* (-i implies -v) *//* FALLTHROUGH */
       case 'e':
         args |= has_e;  /* FALLTHROUGH */
       case 'l':  /* both options need an argument */
