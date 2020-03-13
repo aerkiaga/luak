@@ -1,8 +1,8 @@
-/*
-** $Id: lparser.h $
-** Lua Parser
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: lparser.h $
+ ** Lua Parser
+ ** See Copyright Notice in lua.h
+ */
 
 #ifndef lparser_h
 #define lparser_h
@@ -12,16 +12,16 @@
 #include "lzio.h"
 
 
-/*
-** Expression and variable descriptor.
-** Code generation for variables and expressions can be delayed to allow
-** optimizations; An 'expdesc' structure describes a potentially-delayed
-** variable/expression. It has a description of its "main" value plus a
-** list of conditional jumps that can also produce its value (generated
-** by short-circuit operators 'and'/'or').
-*/
+/**
+ ** Expression and variable descriptor.
+ ** Code generation for variables and expressions can be delayed to allow
+ ** optimizations; An 'expdesc' structure describes a potentially-delayed
+ ** variable/expression. It has a description of its "main" value plus a
+ ** list of conditional jumps that can also produce its value (generated
+ ** by short-circuit operators 'and'/'or').
+ */
 
-/* kinds of variables/expressions */
+/** kinds of variables/expressions */
 typedef enum {
   VVOID,  /* when 'expdesc' describes the last expression a list,
              this kind means an empty list (so, no expression) */
@@ -85,13 +85,13 @@ typedef struct expdesc {
 } expdesc;
 
 
-/* kinds of variables */
+/** kinds of variables */
 #define VDKREG		0   /* regular */
 #define RDKCONST	1   /* constant */
 #define RDKTOCLOSE	2   /* to-be-closed */
 #define RDKCTC		3   /* compile-time constant */
 
-/* description of an active local variable */
+/** description of an active local variable */
 typedef union Vardesc {
   struct {
     TValuefields;  /* constant value (if it is a compile-time constant) */
@@ -105,7 +105,7 @@ typedef union Vardesc {
 
 
 
-/* description of pending goto statements and label statements */
+/** description of pending goto statements and label statements */
 typedef struct Labeldesc {
   TString *name;  /* label identifier */
   int pc;  /* position in code */
@@ -115,7 +115,7 @@ typedef struct Labeldesc {
 } Labeldesc;
 
 
-/* list of labels or gotos */
+/** list of labels or gotos */
 typedef struct Labellist {
   Labeldesc *arr;  /* array */
   int n;  /* number of entries in use */
@@ -123,7 +123,7 @@ typedef struct Labellist {
 } Labellist;
 
 
-/* dynamic structures used by the parser */
+/** dynamic structures used by the parser */
 typedef struct Dyndata {
   struct {  /* list of active local variables */
     Vardesc *arr;
@@ -135,11 +135,11 @@ typedef struct Dyndata {
 } Dyndata;
 
 
-/* control of blocks */
+/** control of blocks */
 struct BlockCnt;  /* defined in lparser.c */
 
 
-/* state needed to generate code for a given function */
+/** state needed to generate code for a given function */
 typedef struct FuncState {
   Proto *f;  /* current function header */
   struct FuncState *prev;  /* enclosing function */

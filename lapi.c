@@ -1,8 +1,8 @@
-/*
-** $Id: lapi.c $
-** Lua API
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: lapi.c $
+ ** Lua API
+ ** See Copyright Notice in lua.h
+ */
 
 #define lapi_c
 #define LUA_CORE
@@ -38,18 +38,18 @@ const char lua_ident[] =
 
 
 
-/*
-** Test for a valid index.
-** '!ttisnil(o)' implies 'o != &G(L)->nilvalue', so it is not needed.
-** However, it covers the most common cases in a faster way.
-*/
+/**
+ ** Test for a valid index.
+ ** '!ttisnil(o)' implies 'o != &G(L)->nilvalue', so it is not needed.
+ ** However, it covers the most common cases in a faster way.
+ */
 #define isvalid(L, o)	(!ttisnil(o) || o != &G(L)->nilvalue)
 
 
-/* test for pseudo index */
+/** test for pseudo index */
 #define ispseudo(i)		((i) <= LUA_REGISTRYINDEX)
 
-/* test for upvalue */
+/** test for upvalue */
 #define isupvalue(i)		((i) < LUA_REGISTRYINDEX)
 
 
@@ -149,14 +149,14 @@ LUA_API lua_Number lua_version (lua_State *L) {
 
 
 
-/*
-** basic stack manipulation
-*/
+/**
+ ** basic stack manipulation
+ */
 
 
-/*
-** convert an acceptable stack index into an absolute index
-*/
+/**
+ ** convert an acceptable stack index into an absolute index
+ */
 LUA_API int lua_absindex (lua_State *L, int idx) {
   return (idx > 0 || ispseudo(idx))
          ? idx
@@ -191,12 +191,12 @@ LUA_API void lua_settop (lua_State *L, int idx) {
 }
 
 
-/*
-** Reverse the stack segment from 'from' to 'to'
-** (auxiliary to 'lua_rotate')
-** Note that we move(copy) only the value inside the stack.
-** (We do not move additional fields that may exist.)
-*/
+/**
+ ** Reverse the stack segment from 'from' to 'to'
+ ** (auxiliary to 'lua_rotate')
+ ** Note that we move(copy) only the value inside the stack.
+ ** (We do not move additional fields that may exist.)
+ */
 static void reverse (lua_State *L, StkId from, StkId to) {
   for (; from < to; from++, to--) {
     TValue temp;
@@ -207,10 +207,10 @@ static void reverse (lua_State *L, StkId from, StkId to) {
 }
 
 
-/*
-** Let x = AB, where A is a prefix of length 'n'. Then,
-** rotate x n == BA. But BA == (A^r . B^r)^r.
-*/
+/**
+ ** Let x = AB, where A is a prefix of length 'n'. Then,
+ ** rotate x n == BA. But BA == (A^r . B^r)^r.
+ */
 LUA_API void lua_rotate (lua_State *L, int idx, int n) {
   StkId p, t, m;
   lua_lock(L);
@@ -249,9 +249,9 @@ LUA_API void lua_pushvalue (lua_State *L, int idx) {
 
 
 
-/*
-** access functions (stack -> C)
-*/
+/**
+ ** access functions (stack -> C)
+ */
 
 
 LUA_API int lua_type (lua_State *L, int idx) {
@@ -436,13 +436,13 @@ LUA_API lua_State *lua_tothread (lua_State *L, int idx) {
 }
 
 
-/*
-** Returns a pointer to the internal representation of an object.
-** Note that ANSI C does not allow the conversion of a pointer to
-** function to a 'void*', so the conversion here goes through
-** a 'size_t'. (As the returned pointer is only informative, this
-** conversion should not be a problem.)
-*/
+/**
+ ** Returns a pointer to the internal representation of an object.
+ ** Note that ANSI C does not allow the conversion of a pointer to
+ ** function to a 'void*', so the conversion here goes through
+ ** a 'size_t'. (As the returned pointer is only informative, this
+ ** conversion should not be a problem.)
+ */
 LUA_API const void *lua_topointer (lua_State *L, int idx) {
   const TValue *o = index2value(L, idx);
   switch (ttypetag(o)) {
@@ -460,9 +460,9 @@ LUA_API const void *lua_topointer (lua_State *L, int idx) {
 
 
 
-/*
-** push functions (C -> stack)
-*/
+/**
+ ** push functions (C -> stack)
+ */
 
 
 LUA_API void lua_pushnil (lua_State *L) {
@@ -489,11 +489,11 @@ LUA_API void lua_pushinteger (lua_State *L, lua_Integer n) {
 }
 
 
-/*
-** Pushes on the stack a string with given length. Avoid using 's' when
-** 'len' == 0 (as 's' can be NULL in that case), due to later use of
-** 'memcmp' and 'memcpy'.
-*/
+/**
+ ** Pushes on the stack a string with given length. Avoid using 's' when
+ ** 'len' == 0 (as 's' can be NULL in that case), due to later use of
+ ** 'memcmp' and 'memcpy'.
+ */
 LUA_API const char *lua_pushlstring (lua_State *L, const char *s, size_t len) {
   TString *ts;
   lua_lock(L);
@@ -601,9 +601,9 @@ LUA_API int lua_pushthread (lua_State *L) {
 
 
 
-/*
-** get functions (Lua -> stack)
-*/
+/**
+ ** get functions (Lua -> stack)
+ */
 
 
 static int auxgetstr (lua_State *L, const TValue *t, const char *k) {
@@ -778,13 +778,13 @@ LUA_API int lua_getiuservalue (lua_State *L, int idx, int n) {
 }
 
 
-/*
-** set functions (stack -> Lua)
-*/
+/**
+ ** set functions (stack -> Lua)
+ */
 
-/*
-** t[k] = value at the top of the stack (where 'k' is a string)
-*/
+/**
+ ** t[k] = value at the top of the stack (where 'k' is a string)
+ */
 static void auxsetstr (lua_State *L, const TValue *t, const char *k) {
   const TValue *slot;
   TString *str = luaS_new(L, k);
@@ -950,9 +950,9 @@ LUA_API int lua_setiuservalue (lua_State *L, int idx, int n) {
 }
 
 
-/*
-** 'load' and 'call' functions (run Lua code)
-*/
+/**
+ ** 'load' and 'call' functions (run Lua code)
+ */
 
 
 #define checkresults(L,na,nr) \
@@ -983,9 +983,9 @@ LUA_API void lua_callk (lua_State *L, int nargs, int nresults,
 
 
 
-/*
-** Execute a protected call.
-*/
+/**
+ ** Execute a protected call.
+ */
 struct CallS {  /* data to 'f_call' */
   StkId func;
   int nresults;
@@ -1087,9 +1087,9 @@ LUA_API int lua_status (lua_State *L) {
 }
 
 
-/*
-** Garbage-collection function
-*/
+/**
+ ** Garbage-collection function
+ */
 LUA_API int lua_gc (lua_State *L, int what, ...) {
   va_list argp;
   int res = 0;
@@ -1188,9 +1188,9 @@ LUA_API int lua_gc (lua_State *L, int what, ...) {
 
 
 
-/*
-** miscellaneous functions
-*/
+/**
+ ** miscellaneous functions
+ */
 
 
 LUA_API int lua_error (lua_State *L) {

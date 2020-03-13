@@ -1,8 +1,8 @@
-/*
-** $Id: lundump.c $
-** load precompiled Lua chunks
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: lundump.c $
+ ** load precompiled Lua chunks
+ ** See Copyright Notice in lua.h
+ */
 
 #define lundump_c
 #define LUA_CORE
@@ -43,10 +43,10 @@ static l_noret error (LoadState *S, const char *why) {
 }
 
 
-/*
-** All high-level loads go through loadVector; you can change it to
-** adapt to the endianness of the input
-*/
+/**
+ ** All high-level loads go through loadVector; you can change it to
+ ** adapt to the endianness of the input
+ */
 #define loadVector(S,b,n)	loadBlock(S,b,(n)*sizeof((b)[0]))
 
 static void loadBlock (LoadState *S, void *b, size_t size) {
@@ -104,9 +104,9 @@ static lua_Integer loadInteger (LoadState *S) {
 }
 
 
-/*
-** Load a nullable string.
-*/
+/**
+ ** Load a nullable string.
+ */
 static TString *loadStringN (LoadState *S) {
   size_t size = loadSize(S);
   if (size == 0)
@@ -124,9 +124,9 @@ static TString *loadStringN (LoadState *S) {
 }
 
 
-/*
-** Load a non-nullable string.
-*/
+/**
+ ** Load a non-nullable string.
+ */
 static TString *loadString (LoadState *S) {
   TString *st = loadStringN(S);
   if (st == NULL)
@@ -291,9 +291,9 @@ static void checkHeader (LoadState *S) {
 }
 
 
-/*
-** Load precompiled chunk.
-*/
+/**
+ ** Load precompiled chunk.
+ */
 LClosure *luaU_undump(lua_State *L, ZIO *Z, const char *name) {
   LoadState S;
   LClosure *cl;

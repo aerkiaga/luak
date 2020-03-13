@@ -1,8 +1,8 @@
-/*
-** $Id: lparser.c $
-** Lua Parser
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: lparser.c $
+ ** Lua Parser
+ ** See Copyright Notice in lua.h
+ */
 
 #define lparser_c
 #define LUA_CORE
@@ -30,7 +30,7 @@
 
 
 
-/* maximum number of local variables per function (must be smaller
+/** maximum number of local variables per function (must be smaller
    than 250, due to the bytecode format) */
 #define MAXVARS		200
 
@@ -38,14 +38,14 @@
 #define hasmultret(k)		((k) == VCALL || (k) == VVARARG)
 
 
-/* because all strings are unified by the scanner, the parser
+/** because all strings are unified by the scanner, the parser
    can use pointer equality for string equality */
 #define eqstr(a,b)	((a) == (b))
 
 
-/*
-** nodes for block list (list of active blocks)
-*/
+/**
+ ** nodes for block list (list of active blocks)
+ */
 typedef struct BlockCnt {
   struct BlockCnt *previous;  /* chain */
   int firstlabel;  /* index of first label in this block */
@@ -58,9 +58,9 @@ typedef struct BlockCnt {
 
 
 
-/*
-** prototypes for recursive non-terminal functions
-*/
+/**
+ ** prototypes for recursive non-terminal functions
+ */
 static void statement (LexState *ls);
 static void expr (LexState *ls, expdesc *v);
 
@@ -89,9 +89,9 @@ static void checklimit (FuncState *fs, int v, int l, const char *what) {
 }
 
 
-/*
-** Test whether next token is 'c'; if so, skip it.
-*/
+/**
+ ** Test whether next token is 'c'; if so, skip it.
+ */
 static int testnext (LexState *ls, int c) {
   if (ls->t.token == c) {
     luaX_next(ls);
@@ -101,18 +101,18 @@ static int testnext (LexState *ls, int c) {
 }
 
 
-/*
-** Check that next token is 'c'.
-*/
+/**
+ ** Check that next token is 'c'.
+ */
 static void check (LexState *ls, int c) {
   if (ls->t.token != c)
     error_expected(ls, c);
 }
 
 
-/*
-** Check that next token is 'c' and skip it.
-*/
+/**
+ ** Check that next token is 'c' and skip it.
+ */
 static void checknext (LexState *ls, int c) {
   check(ls, c);
   luaX_next(ls);
@@ -122,11 +122,11 @@ static void checknext (LexState *ls, int c) {
 #define check_condition(ls,c,msg)	{ if (!(c)) luaX_syntaxerror(ls, msg); }
 
 
-/*
-** Check that next token is 'what' and skip it. In case of error,
-** raise an error that the expected 'what' should match a 'who'
-** in line 'where' (if that is not the current line).
-*/
+/**
+ ** Check that next token is 'what' and skip it. In case of error,
+ ** raise an error that the expected 'what' should match a 'who'
+ ** in line 'where' (if that is not the current line).
+ */
 static void check_match (LexState *ls, int what, int who, int where) {
   if (unlikely(!testnext(ls, what))) {
     if (where == ls->linenumber)  /* all in the same line? */
@@ -168,10 +168,10 @@ static void codename (LexState *ls, expdesc *e) {
 }
 
 
-/*
-** Register a new local variable in the active 'Proto' (for debug
-** information).
-*/
+/**
+ ** Register a new local variable in the active 'Proto' (for debug
+ ** information).
+ */
 static int registerlocalvar (LexState *ls, FuncState *fs, TString *varname) {
   Proto *f = fs->f;
   int oldsize = f->sizelocvars;
@@ -186,10 +186,10 @@ static int registerlocalvar (LexState *ls, FuncState *fs, TString *varname) {
 }
 
 
-/*
-** Create a new local variable with the given 'name'. Return its index
-** in the function.
-*/
+/**
+ ** Create a new local variable with the given 'name'. Return its index
+ ** in the function.
+ */
 static int new_localvar (LexState *ls, TString *name) {
   lua_State *L = ls->L;
   FuncState *fs = ls->fs;
@@ -211,19 +211,19 @@ static int new_localvar (LexState *ls, TString *name) {
 
 
 
-/*
-** Return the "variable description" (Vardesc) of a given
-** variable
-*/
+/**
+ ** Return the "variable description" (Vardesc) of a given
+ ** variable
+ */
 static Vardesc *getlocalvardesc (FuncState *fs, int i) {
   return &fs->ls->dyd->actvar.arr[fs->firstlocal + i];
 }
 
 
-/*
-** Convert 'nvar' (number of active variables at some point) to
-** number of variables in the stack at that point.
-*/
+/**
+ ** Convert 'nvar' (number of active variables at some point) to
+ ** number of variables in the stack at that point.
+ */
 static int stacklevel (FuncState *fs, int nvar) {
   while (nvar > 0) {
     Vardesc *vd = getlocalvardesc(fs, nvar - 1);
@@ -236,17 +236,17 @@ static int stacklevel (FuncState *fs, int nvar) {
 }
 
 
-/*
-** Return the number of variables in the stack for function 'fs'
-*/
+/**
+ ** Return the number of variables in the stack for function 'fs'
+ */
 int luaY_nvarstack (FuncState *fs) {
   return stacklevel(fs, fs->nactvar);
 }
 
 
-/*
-** Get the debug-information entry for current variable 'i'.
-*/
+/**
+ ** Get the debug-information entry for current variable 'i'.
+ */
 static LocVar *localdebuginfo (FuncState *fs, int i) {
   Vardesc *vd = getlocalvardesc(fs, i);
   if (vd->vd.kind == RDKCTC)
@@ -298,9 +298,9 @@ static void check_readonly (LexState *ls, expdesc *e) {
 }
 
 
-/*
-** Start the scope for the last 'nvars' created variables.
-*/
+/**
+ ** Start the scope for the last 'nvars' created variables.
+ */
 static void adjustlocalvars (LexState *ls, int nvars) {
   FuncState *fs = ls->fs;
   int stklevel = luaY_nvarstack(fs);
@@ -314,10 +314,10 @@ static void adjustlocalvars (LexState *ls, int nvars) {
 }
 
 
-/*
-** Close the scope for all variables up to level 'tolevel'.
-** (debug info.)
-*/
+/**
+ ** Close the scope for all variables up to level 'tolevel'.
+ ** (debug info.)
+ */
 static void removevars (FuncState *fs, int tolevel) {
   fs->ls->dyd->actvar.n -= (fs->nactvar - tolevel);
   while (fs->nactvar > tolevel) {
@@ -328,10 +328,10 @@ static void removevars (FuncState *fs, int tolevel) {
 }
 
 
-/*
-** Search the upvalues of the function 'fs' for one
-** with the given 'name'.
-*/
+/**
+ ** Search the upvalues of the function 'fs' for one
+ ** with the given 'name'.
+ */
 static int searchupvalue (FuncState *fs, TString *name) {
   int i;
   Upvaldesc *up = fs->f->upvalues;
@@ -375,10 +375,10 @@ static int newupvalue (FuncState *fs, TString *name, expdesc *v) {
 }
 
 
-/*
-** Look for an active local variable with the name 'n' in the
-** function 'fs'.
-*/
+/**
+ ** Look for an active local variable with the name 'n' in the
+ ** function 'fs'.
+ */
 static int searchvar (FuncState *fs, TString *n, expdesc *var) {
   int i;
   for (i = cast_int(fs->nactvar) - 1; i >= 0; i--) {
@@ -395,10 +395,10 @@ static int searchvar (FuncState *fs, TString *n, expdesc *var) {
 }
 
 
-/*
-** Mark block where variable at given level was defined
-** (to emit close instructions later).
-*/
+/**
+ ** Mark block where variable at given level was defined
+ ** (to emit close instructions later).
+ */
 static void markupval (FuncState *fs, int level) {
   BlockCnt *bl = fs->bl;
   while (bl->nactvar > level)
@@ -408,11 +408,11 @@ static void markupval (FuncState *fs, int level) {
 }
 
 
-/*
-** Find a variable with the given name 'n'. If it is an upvalue, add
-** this upvalue into all intermediate functions. If it is a global, set
-** 'var' as 'void' as a flag.
-*/
+/**
+ ** Find a variable with the given name 'n'. If it is an upvalue, add
+ ** this upvalue into all intermediate functions. If it is a global, set
+ ** 'var' as 'void' as a flag.
+ */
 static void singlevaraux (FuncState *fs, TString *n, expdesc *var, int base) {
   if (fs == NULL)  /* no more levels? */
     init_exp(var, VVOID, 0);  /* default is global */
@@ -437,10 +437,10 @@ static void singlevaraux (FuncState *fs, TString *n, expdesc *var, int base) {
 }
 
 
-/*
-** Find a variable with the given name 'n', handling global variables
-** too.
-*/
+/**
+ ** Find a variable with the given name 'n', handling global variables
+ ** too.
+ */
 static void singlevar (LexState *ls, expdesc *var) {
   TString *varname = str_checkname(ls);
   FuncState *fs = ls->fs;
@@ -455,10 +455,10 @@ static void singlevar (LexState *ls, expdesc *var) {
 }
 
 
-/*
-** Adjust the number of results from an expression list 'e' with 'nexps'
-** expressions to 'nvars' values.
-*/
+/**
+ ** Adjust the number of results from an expression list 'e' with 'nexps'
+ ** expressions to 'nvars' values.
+ */
 static void adjust_assign (LexState *ls, int nvars, int nexps, expdesc *e) {
   FuncState *fs = ls->fs;
   int needed = nvars - nexps;  /* extra values needed */
@@ -481,18 +481,18 @@ static void adjust_assign (LexState *ls, int nvars, int nexps, expdesc *e) {
 }
 
 
-/*
-** Macros to limit the maximum recursion depth while parsing
-*/
+/**
+ ** Macros to limit the maximum recursion depth while parsing
+ */
 #define enterlevel(ls)	luaE_enterCcall((ls)->L)
 
 #define leavelevel(ls)	luaE_exitCcall((ls)->L)
 
 
-/*
-** Generates an error that a goto jumps into the scope of some
-** local variable.
-*/
+/**
+ ** Generates an error that a goto jumps into the scope of some
+ ** local variable.
+ */
 static l_noret jumpscopeerror (LexState *ls, Labeldesc *gt) {
   const char *varname = getstr(getlocalvardesc(ls->fs, gt->nactvar)->vd.name);
   const char *msg = "<goto %s> at line %d jumps into the scope of local '%s'";
@@ -501,11 +501,11 @@ static l_noret jumpscopeerror (LexState *ls, Labeldesc *gt) {
 }
 
 
-/*
-** Solves the goto at index 'g' to given 'label' and removes it
-** from the list of pending goto's.
-** If it jumps into the scope of some variable, raises an error.
-*/
+/**
+ ** Solves the goto at index 'g' to given 'label' and removes it
+ ** from the list of pending goto's.
+ ** If it jumps into the scope of some variable, raises an error.
+ */
 static void solvegoto (LexState *ls, int g, Labeldesc *label) {
   int i;
   Labellist *gl = &ls->dyd->gt;  /* list of goto's */
@@ -520,9 +520,9 @@ static void solvegoto (LexState *ls, int g, Labeldesc *label) {
 }
 
 
-/*
-** Search for an active label with the given name.
-*/
+/**
+ ** Search for an active label with the given name.
+ */
 static Labeldesc *findlabel (LexState *ls, TString *name) {
   int i;
   Dyndata *dyd = ls->dyd;
@@ -536,9 +536,9 @@ static Labeldesc *findlabel (LexState *ls, TString *name) {
 }
 
 
-/*
-** Adds a new label/goto in the corresponding list.
-*/
+/**
+ ** Adds a new label/goto in the corresponding list.
+ */
 static int newlabelentry (LexState *ls, Labellist *l, TString *name,
                           int line, int pc) {
   int n = l->n;
@@ -559,11 +559,11 @@ static int newgotoentry (LexState *ls, TString *name, int line, int pc) {
 }
 
 
-/*
-** Solves forward jumps. Check whether new label 'lb' matches any
-** pending gotos in current block and solves them. Return true
-** if any of the goto's need to close upvalues.
-*/
+/**
+ ** Solves forward jumps. Check whether new label 'lb' matches any
+ ** pending gotos in current block and solves them. Return true
+ ** if any of the goto's need to close upvalues.
+ */
 static int solvegotos (LexState *ls, Labeldesc *lb) {
   Labellist *gl = &ls->dyd->gt;
   int i = ls->fs->bl->firstgoto;
@@ -580,13 +580,13 @@ static int solvegotos (LexState *ls, Labeldesc *lb) {
 }
 
 
-/*
-** Create a new label with the given 'name' at the given 'line'.
-** 'last' tells whether label is the last non-op statement in its
-** block. Solves all pending goto's to this new label and adds
-** a close instruction if necessary.
-** Returns true iff it added a close instruction.
-*/
+/**
+ ** Create a new label with the given 'name' at the given 'line'.
+ ** 'last' tells whether label is the last non-op statement in its
+ ** block. Solves all pending goto's to this new label and adds
+ ** a close instruction if necessary.
+ ** Returns true iff it added a close instruction.
+ */
 static int createlabel (LexState *ls, TString *name, int line,
                         int last) {
   FuncState *fs = ls->fs;
@@ -604,9 +604,9 @@ static int createlabel (LexState *ls, TString *name, int line,
 }
 
 
-/*
-** Adjust pending gotos to outer level of a block.
-*/
+/**
+ ** Adjust pending gotos to outer level of a block.
+ */
 static void movegotosout (FuncState *fs, BlockCnt *bl) {
   int i;
   Labellist *gl = &fs->ls->dyd->gt;
@@ -634,9 +634,9 @@ static void enterblock (FuncState *fs, BlockCnt *bl, lu_byte isloop) {
 }
 
 
-/*
-** generates an error for an undefined 'goto'.
-*/
+/**
+ ** generates an error for an undefined 'goto'.
+ */
 static l_noret undefgoto (LexState *ls, Labeldesc *gt) {
   const char *msg;
   if (eqstr(gt->name, luaS_newliteral(ls->L, "break"))) {
@@ -674,9 +674,9 @@ static void leaveblock (FuncState *fs) {
 }
 
 
-/*
-** adds a new prototype into list of prototypes
-*/
+/**
+ ** adds a new prototype into list of prototypes
+ */
 static Proto *addprototype (LexState *ls) {
   Proto *clp;
   lua_State *L = ls->L;
@@ -694,13 +694,13 @@ static Proto *addprototype (LexState *ls) {
 }
 
 
-/*
-** codes instruction to create new closure in parent function.
-** The OP_CLOSURE instruction uses the last available register,
-** so that, if it invokes the GC, the GC knows which registers
-** are in use at that time.
+/**
+ ** codes instruction to create new closure in parent function.
+ ** The OP_CLOSURE instruction uses the last available register,
+ ** so that, if it invokes the GC, the GC knows which registers
+ ** are in use at that time.
 
-*/
+ */
 static void codeclosure (LexState *ls, expdesc *v) {
   FuncState *fs = ls->fs->prev;
   init_exp(v, VRELOC, luaK_codeABx(fs, OP_CLOSURE, 0, fs->np - 1));
@@ -756,16 +756,16 @@ static void close_func (LexState *ls) {
 
 
 
-/*============================================================*/
-/* GRAMMAR RULES */
-/*============================================================*/
+/**============================================================*/
+/** GRAMMAR RULES */
+/**============================================================*/
 
 
-/*
-** check whether current token is in the follow set of a block.
-** 'until' closes syntactical blocks, but do not close scope,
-** so it is handled in separate.
-*/
+/**
+ ** check whether current token is in the follow set of a block.
+ ** 'until' closes syntactical blocks, but do not close scope,
+ ** so it is handled in separate.
+ */
 static int block_follow (LexState *ls, int withuntil) {
   switch (ls->t.token) {
     case TK_ELSE: case TK_ELSEIF:
@@ -809,11 +809,11 @@ static void yindex (LexState *ls, expdesc *v) {
 }
 
 
-/*
-** {======================================================================
-** Rules for Constructors
-** =======================================================================
-*/
+/**
+ ** @{======================================================================
+ ** Rules for Constructors
+ ** =======================================================================
+ */
 
 
 typedef struct ConsControl {
@@ -928,7 +928,7 @@ static void constructor (LexState *ls, expdesc *t) {
   luaK_settablesize(fs, pc, t->u.info, cc.na, cc.nh);
 }
 
-/* }====================================================================== */
+/** @}====================================================================== */
 
 
 static void setvararg (FuncState *fs, int nparams) {
@@ -1051,11 +1051,11 @@ static void funcargs (LexState *ls, expdesc *f, int line) {
 
 
 
-/*
-** {======================================================================
-** Expression parsing
-** =======================================================================
-*/
+/**
+ ** @{======================================================================
+ ** Expression parsing
+ ** =======================================================================
+ */
 
 
 static void primaryexp (LexState *ls, expdesc *v) {
@@ -1212,9 +1212,9 @@ static BinOpr getbinopr (int op) {
 }
 
 
-/*
-** Priority table for binary operators.
-*/
+/**
+ ** Priority table for binary operators.
+ */
 static const struct {
   lu_byte left;  /* left priority for each binary operator */
   lu_byte right; /* right priority */
@@ -1234,10 +1234,10 @@ static const struct {
 #define UNARY_PRIORITY	12  /* priority for unary operators */
 
 
-/*
-** subexpr -> (simpleexp | unop subexpr) { binop subexpr }
-** where 'binop' is any binary operator with a priority higher than 'limit'
-*/
+/**
+ ** subexpr -> (simpleexp | unop subexpr) { binop subexpr }
+ ** where 'binop' is any binary operator with a priority higher than 'limit'
+ */
 static BinOpr subexpr (LexState *ls, expdesc *v, int limit) {
   BinOpr op;
   UnOpr uop;
@@ -1272,15 +1272,15 @@ static void expr (LexState *ls, expdesc *v) {
   subexpr(ls, v, 0);
 }
 
-/* }==================================================================== */
+/** @}==================================================================== */
 
 
 
-/*
-** {======================================================================
-** Rules for Statements
-** =======================================================================
-*/
+/**
+ ** @{======================================================================
+ ** Rules for Statements
+ ** =======================================================================
+ */
 
 
 static void block (LexState *ls) {
@@ -1293,22 +1293,22 @@ static void block (LexState *ls) {
 }
 
 
-/*
-** structure to chain all variables in the left-hand side of an
-** assignment
-*/
+/**
+ ** structure to chain all variables in the left-hand side of an
+ ** assignment
+ */
 struct LHS_assign {
   struct LHS_assign *prev;
   expdesc v;  /* variable (global, local, upvalue, or indexed) */
 };
 
 
-/*
-** check whether, in an assignment to an upvalue/local variable, the
-** upvalue/local variable is begin used in a previous assignment to a
-** table. If so, save original upvalue/local value in a safe place and
-** use this safe copy in the previous assignment.
-*/
+/**
+ ** check whether, in an assignment to an upvalue/local variable, the
+ ** upvalue/local variable is begin used in a previous assignment to a
+ ** table. If so, save original upvalue/local value in a safe place and
+ ** use this safe copy in the previous assignment.
+ */
 static void check_conflict (LexState *ls, struct LHS_assign *lh, expdesc *v) {
   FuncState *fs = ls->fs;
   int extra = fs->freereg;  /* eventual position to save local variable */
@@ -1346,13 +1346,13 @@ static void check_conflict (LexState *ls, struct LHS_assign *lh, expdesc *v) {
   }
 }
 
-/*
-** Parse and compile a multiple assignment. The first "variable"
-** (a 'suffixedexp') was already read by the caller.
-**
-** assignment -> suffixedexp restassign
-** restassign -> ',' suffixedexp restassign | '=' explist
-*/
+/**
+ ** Parse and compile a multiple assignment. The first "variable"
+ ** (a 'suffixedexp') was already read by the caller.
+ **
+ ** assignment -> suffixedexp restassign
+ ** restassign -> ',' suffixedexp restassign | '=' explist
+ */
 static void restassign (LexState *ls, struct LHS_assign *lh, int nvars) {
   expdesc e;
   check_condition(ls, vkisvar(lh->v.k), "syntax error");
@@ -1413,9 +1413,9 @@ static void gotostat (LexState *ls) {
 }
 
 
-/*
-** Break statement. Semantically equivalent to "goto break".
-*/
+/**
+ ** Break statement. Semantically equivalent to "goto break".
+ */
 static void breakstat (LexState *ls) {
   int line = ls->linenumber;
   luaX_next(ls);  /* skip break */
@@ -1423,9 +1423,9 @@ static void breakstat (LexState *ls) {
 }
 
 
-/*
-** Check whether there is already a label with the given 'name'.
-*/
+/**
+ ** Check whether there is already a label with the given 'name'.
+ */
 static void checkrepeated (LexState *ls, TString *name) {
   Labeldesc *lb = findlabel(ls, name);
   if (unlikely(lb != NULL)) {  /* already defined? */
@@ -1490,11 +1490,11 @@ static void repeatstat (LexState *ls, int line) {
 }
 
 
-/*
-** Read an expression and generate code to put its results in next
-** stack slot.
-**
-*/
+/**
+ ** Read an expression and generate code to put its results in next
+ ** stack slot.
+ **
+ */
 static void exp1 (LexState *ls) {
   expdesc e;
   expr(ls, &e);
@@ -1503,11 +1503,11 @@ static void exp1 (LexState *ls) {
 }
 
 
-/*
-** Fix for instruction at position 'pc' to jump to 'dest'.
-** (Jump addresses are relative in Lua). 'back' true means
-** a back jump.
-*/
+/**
+ ** Fix for instruction at position 'pc' to jump to 'dest'.
+ ** (Jump addresses are relative in Lua). 'back' true means
+ ** a back jump.
+ */
 static void fixforjump (FuncState *fs, int pc, int dest, int back) {
   Instruction *jmp = &fs->f->code[pc];
   int offset = dest - (pc + 1);
@@ -1519,9 +1519,9 @@ static void fixforjump (FuncState *fs, int pc, int dest, int back) {
 }
 
 
-/*
-** Generate code for a 'for' loop.
-*/
+/**
+ ** Generate code for a 'for' loop.
+ */
 static void forbody (LexState *ls, int base, int line, int nvars, int isgen) {
   /* forbody -> DO block */
   static const OpCode forprep[2] = {OP_FORPREP, OP_TFORPREP};
@@ -1616,14 +1616,14 @@ static void forstat (LexState *ls, int line) {
 }
 
 
-/*
-** Check whether next instruction is a single jump (a 'break', a 'goto'
-** to a forward label, or a 'goto' to a backward label with no variable
-** to close). If so, set the name of the 'label' it is jumping to
-** ("break" for a 'break') or to where it is jumping to ('target') and
-** return true. If not a single jump, leave input unchanged, to be
-** handled as a regular statement.
-*/
+/**
+ ** Check whether next instruction is a single jump (a 'break', a 'goto'
+ ** to a forward label, or a 'goto' to a backward label with no variable
+ ** to close). If so, set the name of the 'label' it is jumping to
+ ** ("break" for a 'break') or to where it is jumping to ('target') and
+ ** return true. If not a single jump, leave input unchanged, to be
+ ** handled as a regular statement.
+ */
 static int issinglejump (LexState *ls, TString **label, int *target) {
   if (testnext(ls, TK_BREAK)) {  /* a break? */
     *label = luaS_newliteral(ls->L, "break");
@@ -1933,13 +1933,13 @@ static void statement (LexState *ls) {
   leavelevel(ls);
 }
 
-/* }====================================================================== */
+/** @}====================================================================== */
 
 
-/*
-** compiles the main function, which is a regular vararg function with an
-** upvalue named LUA_ENV
-*/
+/**
+ ** compiles the main function, which is a regular vararg function with an
+ ** upvalue named LUA_ENV
+ */
 static void mainfunc (LexState *ls, FuncState *fs) {
   BlockCnt bl;
   Upvaldesc *env;

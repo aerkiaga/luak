@@ -1,8 +1,8 @@
-/*
-** $Id: lopcodes.c $
-** Opcodes for Lua virtual machine
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: lopcodes.c $
+ ** Opcodes for Lua virtual machine
+ ** See Copyright Notice in lua.h
+ */
 
 #define lopcodes_c
 #define LUA_CORE
@@ -15,10 +15,10 @@
 #include "lopcodes.h"
 
 
-/* ORDER OP */
+/** ORDER OP */
 
 LUAI_DDEF const lu_byte luaP_opmodes[NUM_OPCODES] = {
-/*       MM OT IT T  A  mode		   opcode  */
+/**       MM OT IT T  A  mode		   opcode  */
   opmode(0, 0, 0, 0, 1, iABC)		/* OP_MOVE */
  ,opmode(0, 0, 0, 0, 1, iAsBx)		/* OP_LOADI */
  ,opmode(0, 0, 0, 0, 1, iAsBx)		/* OP_LOADF */

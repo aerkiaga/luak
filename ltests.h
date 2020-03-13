@@ -1,8 +1,8 @@
-/*
-** $Id: ltests.h $
-** Internal Header for Debugging of the Lua Implementation
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: ltests.h $
+ ** Internal Header for Debugging of the Lua Implementation
+ ** See Copyright Notice in lua.h
+ */
 
 #ifndef ltests_h
 #define ltests_h
@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* test Lua with compatibility code */
+/** test Lua with compatibility code */
 #define LUA_COMPAT_MATHLIB
 #define LUA_COMPAT_LT_LE
 
@@ -19,22 +19,22 @@
 #define LUA_DEBUG
 
 
-/* turn on assertions */
+/** turn on assertions */
 #undef NDEBUG
 #include <assert.h>
 #define lua_assert(c)           assert(c)
 
 
 
-/* compiled with -O0, Lua uses a lot of C stack space... */
+/** compiled with -O0, Lua uses a lot of C stack space... */
 #undef LUAI_MAXCSTACK
 #define LUAI_MAXCSTACK		400
 
-/* to avoid warnings, and to make sure value is really unused */
+/** to avoid warnings, and to make sure value is really unused */
 #define UNUSED(x)       (x=0, (void)(x))
 
 
-/* test for sizes in 'l_sprintf' (make sure whole buffer is available) */
+/** test for sizes in 'l_sprintf' (make sure whole buffer is available) */
 #undef l_sprintf
 #if !defined(LUA_USE_C89)
 #define l_sprintf(s,sz,f,i)	(memset(s,0xAB,sz), snprintf(s,sz,f,i))
@@ -43,15 +43,15 @@
 #endif
 
 
-/* get a chance to test code without jump tables */
+/** get a chance to test code without jump tables */
 #define LUA_USE_JUMPTABLE	0
 
 
-/* use 32-bit integers in random generator */
+/** use 32-bit integers in random generator */
 #define LUA_RAND32
 
 
-/* memory-allocator control variables */
+/** memory-allocator control variables */
 typedef struct Memcontrol {
   unsigned long numblocks;
   unsigned long total;
@@ -64,20 +64,20 @@ typedef struct Memcontrol {
 LUA_API Memcontrol l_memcontrol;
 
 
-/*
-** generic variable for debug tricks
-*/
+/**
+ ** generic variable for debug tricks
+ */
 extern void *l_Trick;
 
 
 
-/*
-** Function to traverse and check all memory used by Lua
-*/
+/**
+ ** Function to traverse and check all memory used by Lua
+ */
 int lua_checkmemory (lua_State *L);
 
 
-/* test for lock/unlock */
+/** test for lock/unlock */
 
 struct L_EXTRA { int lock; int *plock; };
 #undef LUA_EXTRASPACE
@@ -111,7 +111,7 @@ LUA_API void *debug_realloc (void *ud, void *block,
 
 
 
-/* change some sizes to give some bugs a chance */
+/** change some sizes to give some bugs a chance */
 
 #undef LUAL_BUFFERSIZE
 #define LUAL_BUFFERSIZE		23
@@ -119,7 +119,7 @@ LUA_API void *debug_realloc (void *ud, void *block,
 #define MAXIWTHABS		3
 
 
-/* make stack-overflow tests run faster */
+/** make stack-overflow tests run faster */
 #undef LUAI_MAXSTACK
 #define LUAI_MAXSTACK   50000
 

@@ -1,8 +1,8 @@
-/*
-** $Id: lopcodes.h $
-** Opcodes for Lua virtual machine
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: lopcodes.h $
+ ** Opcodes for Lua virtual machine
+ ** See Copyright Notice in lua.h
+ */
 
 #ifndef lopcodes_h
 #define lopcodes_h
@@ -10,7 +10,7 @@
 #include "llimits.h"
 
 
-/*===========================================================================
+/**===========================================================================
   We assume that instructions are unsigned 32-bit integers.
   All instructions have an opcode in the first 7 bits.
   Instructions can have the following formats:
@@ -32,9 +32,9 @@ isJ                           sJ(25)                     |   Op(7)     |
 enum OpMode {iABC, iABx, iAsBx, iAx, isJ};  /* basic instruction formats */
 
 
-/*
-** size and position of opcode arguments.
-*/
+/**
+ ** size and position of opcode arguments.
+ */
 #define SIZE_C		8
 #define SIZE_B		8
 #define SIZE_Bx		(SIZE_C + SIZE_B + 1)
@@ -58,13 +58,13 @@ enum OpMode {iABC, iABx, iAsBx, iAx, isJ};  /* basic instruction formats */
 #define POS_sJ		POS_A
 
 
-/*
-** limits for opcode arguments.
-** we use (signed) 'int' to manipulate most arguments,
-** so they must fit in ints.
-*/
+/**
+ ** limits for opcode arguments.
+ ** we use (signed) 'int' to manipulate most arguments,
+ ** so they must fit in ints.
+ */
 
-/* Check whether type 'int' has at least 'b' bits ('b' < 32) */
+/** Check whether type 'int' has at least 'b' bits ('b' < 32) */
 #define L_INTHASBITS(b)		((UINT_MAX >> ((b) - 1)) >= 1)
 
 
@@ -101,15 +101,15 @@ enum OpMode {iABC, iABx, iAsBx, iAx, isJ};  /* basic instruction formats */
 #define sC2int(i)	((i) - OFFSET_sC)
 
 
-/* creates a mask with 'n' 1 bits at position 'p' */
+/** creates a mask with 'n' 1 bits at position 'p' */
 #define MASK1(n,p)	((~((~(Instruction)0)<<(n)))<<(p))
 
-/* creates a mask with 'n' 0 bits at position 'p' */
+/** creates a mask with 'n' 0 bits at position 'p' */
 #define MASK0(n,p)	(~MASK1(n,p))
 
-/*
-** the following macros help to manipulate instructions
-*/
+/**
+ ** the following macros help to manipulate instructions
+ */
 
 #define GET_OPCODE(i)	(cast(OpCode, ((i)>>POS_OP) & MASK1(SIZE_OP,0)))
 #define SET_OPCODE(i,o)	((i) = (((i)&MASK0(SIZE_OP,POS_OP)) | \
@@ -176,25 +176,25 @@ enum OpMode {iABC, iABx, iAsBx, iAx, isJ};  /* basic instruction formats */
 #endif
 
 
-/*
-** invalid register that fits in 8 bits
-*/
+/**
+ ** invalid register that fits in 8 bits
+ */
 #define NO_REG		MAXARG_A
 
 
-/*
-** R[x] - register
-** K[x] - constant (in constant table)
-** RK(x) == if k(i) then K[x] else R[x]
-*/
+/**
+ ** R[x] - register
+ ** K[x] - constant (in constant table)
+ ** RK(x) == if k(i) then K[x] else R[x]
+ */
 
 
-/*
-** grep "ORDER OP" if you change these enums
-*/
+/**
+ ** grep "ORDER OP" if you change these enums
+ */
 
 typedef enum {
-/*----------------------------------------------------------------------
+/**----------------------------------------------------------------------
 name		args	description
 ------------------------------------------------------------------------*/
 OP_MOVE,/*	A B	R[A] := R[B]					*/
@@ -313,7 +313,7 @@ OP_EXTRAARG/*	Ax	extra (larger) argument for previous opcode	*/
 
 
 
-/*===========================================================================
+/**===========================================================================
   Notes:
   (*) In OP_CALL, if (B == 0) then B = top - A. If (C == 0), then
   'top' is set to last_result+1, so next open instruction (OP_CALL,
@@ -355,15 +355,15 @@ OP_EXTRAARG/*	Ax	extra (larger) argument for previous opcode	*/
 ===========================================================================*/
 
 
-/*
-** masks for instruction properties. The format is:
-** bits 0-2: op mode
-** bit 3: instruction set register A
-** bit 4: operator is a test (next instruction must be a jump)
-** bit 5: instruction uses 'L->top' set by previous instruction (when B == 0)
-** bit 6: instruction sets 'L->top' for next instruction (when C == 0)
-** bit 7: instruction is an MM instruction (call a metamethod)
-*/
+/**
+ ** masks for instruction properties. The format is:
+ ** bits 0-2: op mode
+ ** bit 3: instruction set register A
+ ** bit 4: operator is a test (next instruction must be a jump)
+ ** bit 5: instruction uses 'L->top' set by previous instruction (when B == 0)
+ ** bit 6: instruction sets 'L->top' for next instruction (when C == 0)
+ ** bit 7: instruction is an MM instruction (call a metamethod)
+ */
 
 LUAI_DDEC(const lu_byte luaP_opmodes[NUM_OPCODES];)
 
@@ -374,19 +374,19 @@ LUAI_DDEC(const lu_byte luaP_opmodes[NUM_OPCODES];)
 #define testOTMode(m)	(luaP_opmodes[m] & (1 << 6))
 #define testMMMode(m)	(luaP_opmodes[m] & (1 << 7))
 
-/* "out top" (set top for next instruction) */
+/** "out top" (set top for next instruction) */
 #define isOT(i)  \
 	((testOTMode(GET_OPCODE(i)) && GETARG_C(i) == 0) || \
           GET_OPCODE(i) == OP_TAILCALL)
 
-/* "in top" (uses top from previous instruction) */
+/** "in top" (uses top from previous instruction) */
 #define isIT(i)		(testITMode(GET_OPCODE(i)) && GETARG_B(i) == 0)
 
 #define opmode(mm,ot,it,t,a,m)  \
     (((mm) << 7) | ((ot) << 6) | ((it) << 5) | ((t) << 4) | ((a) << 3) | (m))
 
 
-/* number of list items to accumulate before a SETLIST instruction */
+/** number of list items to accumulate before a SETLIST instruction */
 #define LFIELDS_PER_FLUSH	50
 
 #endif

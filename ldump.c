@@ -1,8 +1,8 @@
-/*
-** $Id: ldump.c $
-** save precompiled Lua chunks
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: ldump.c $
+ ** save precompiled Lua chunks
+ ** See Copyright Notice in lua.h
+ */
 
 #define ldump_c
 #define LUA_CORE
@@ -28,10 +28,10 @@ typedef struct {
 } DumpState;
 
 
-/*
-** All high-level dumps go through dumpVector; you can change it to
-** change the endianness of the result
-*/
+/**
+ ** All high-level dumps go through dumpVector; you can change it to
+ ** change the endianness of the result
+ */
 #define dumpVector(D,v,n)	dumpBlock(D,v,(n)*sizeof((v)[0]))
 
 #define dumpLiteral(D, s)	dumpBlock(D,s,sizeof(s) - sizeof(char))
@@ -55,7 +55,7 @@ static void dumpByte (DumpState *D, int y) {
 }
 
 
-/* dumpInt Buff Size */
+/** dumpInt Buff Size */
 #define DIBS    ((sizeof(size_t) * 8 / 7) + 1)
 
 static void dumpSize (DumpState *D, size_t x) {
@@ -207,9 +207,9 @@ static void dumpHeader (DumpState *D) {
 }
 
 
-/*
-** dump Lua function as precompiled chunk
-*/
+/**
+ ** dump Lua function as precompiled chunk
+ */
 int luaU_dump(lua_State *L, const Proto *f, lua_Writer w, void *data,
               int strip) {
   DumpState D;

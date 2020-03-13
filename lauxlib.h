@@ -1,8 +1,8 @@
-/*
-** $Id: lauxlib.h $
-** Auxiliary functions for building Lua libraries
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: lauxlib.h $
+ ** Auxiliary functions for building Lua libraries
+ ** See Copyright Notice in lua.h
+ */
 
 
 #ifndef lauxlib_h
@@ -15,22 +15,22 @@
 #include "lua.h"
 
 
-/* global table */
+/** global table */
 #define	LUA_GNAME	"_G"
 
 
 typedef struct luaL_Buffer luaL_Buffer;
 
 
-/* extra error code for 'luaL_loadfilex' */
+/** extra error code for 'luaL_loadfilex' */
 #define LUA_ERRFILE     (LUA_ERRERR+1)
 
 
-/* key, in the registry, for table of loaded modules */
+/** key, in the registry, for table of loaded modules */
 #define LUA_LOADED_TABLE	"_LOADED"
 
 
-/* key, in the registry, for table of preloaded loaders */
+/** key, in the registry, for table of preloaded loaders */
 #define LUA_PRELOAD_TABLE	"_PRELOAD"
 
 
@@ -81,7 +81,7 @@ LUALIB_API int (luaL_fileresult) (lua_State *L, int stat, const char *fname);
 LUALIB_API int (luaL_execresult) (lua_State *L, int stat);
 
 
-/* predefined references */
+/** predefined references */
 #define LUA_NOREF       (-2)
 #define LUA_REFNIL      (-1)
 
@@ -116,11 +116,11 @@ LUALIB_API void (luaL_traceback) (lua_State *L, lua_State *L1,
 LUALIB_API void (luaL_requiref) (lua_State *L, const char *modname,
                                  lua_CFunction openf, int glb);
 
-/*
-** ===============================================================
-** some useful macros
-** ===============================================================
-*/
+/**
+ ** ===============================================================
+ ** some useful macros
+ ** ===============================================================
+ */
 
 
 #define luaL_newlibtable(L,l)	\
@@ -153,15 +153,15 @@ LUALIB_API void (luaL_requiref) (lua_State *L, const char *modname,
 #define luaL_loadbuffer(L,s,sz,n)	luaL_loadbufferx(L,s,sz,n,NULL)
 
 
-/* push the value used to represent failure/error */
+/** push the value used to represent failure/error */
 #define luaL_pushfail(L)	lua_pushnil(L)
 
 
-/*
-** {======================================================
-** Generic Buffer manipulation
-** =======================================================
-*/
+/**
+ ** @$1======================================================
+ ** Generic Buffer manipulation
+ ** =======================================================
+ */
 
 struct luaL_Buffer {
   char *b;  /* buffer address */
@@ -198,21 +198,21 @@ LUALIB_API char *(luaL_buffinitsize) (lua_State *L, luaL_Buffer *B, size_t sz);
 
 #define luaL_prepbuffer(B)	luaL_prepbuffsize(B, LUAL_BUFFERSIZE)
 
-/* }====================================================== */
+/** @$1====================================================== */
 
 
 
-/*
-** {======================================================
-** File handles for IO library
-** =======================================================
-*/
+/**
+ ** @$1======================================================
+ ** File handles for IO library
+ ** =======================================================
+ */
 
-/*
-** A file handle is a userdata with metatable 'LUA_FILEHANDLE' and
-** initial structure 'luaL_Stream' (it may contain other fields
-** after that initial structure).
-*/
+/**
+ ** A file handle is a userdata with metatable 'LUA_FILEHANDLE' and
+ ** initial structure 'luaL_Stream' (it may contain other fields
+ ** after that initial structure).
+ */
 
 #define LUA_FILEHANDLE          "FILE*"
 
@@ -222,38 +222,38 @@ typedef struct luaL_Stream {
   lua_CFunction closef;  /* to close stream (NULL for closed streams) */
 } luaL_Stream;
 
-/* }====================================================== */
+/** @$1====================================================== */
 
-/*
-** {==================================================================
-** "Abstraction Layer" for basic report of messages and errors
-** ===================================================================
-*/
+/**
+ ** @$1==================================================================
+ ** "Abstraction Layer" for basic report of messages and errors
+ ** ===================================================================
+ */
 
-/* print a string */
+/** print a string */
 #if !defined(lua_writestring)
 #define lua_writestring(s,l)   fwrite((s), sizeof(char), (l), stdout)
 #endif
 
-/* print a newline and flush the output */
+/** print a newline and flush the output */
 #if !defined(lua_writeline)
 #define lua_writeline()        (lua_writestring("\n", 1), fflush(stdout))
 #endif
 
-/* print an error message */
+/** print an error message */
 #if !defined(lua_writestringerror)
 #define lua_writestringerror(s,p) \
         (fprintf(stderr, (s), (p)), fflush(stderr))
 #endif
 
-/* }================================================================== */
+/** @$1================================================================== */
 
 
-/*
-** {============================================================
-** Compatibility with deprecated conversions
-** =============================================================
-*/
+/**
+ ** @$1============================================================
+ ** Compatibility with deprecated conversions
+ ** =============================================================
+ */
 #if defined(LUA_COMPAT_APIINTCASTS)
 
 #define luaL_checkunsigned(L,a)	((lua_Unsigned)luaL_checkinteger(L,a))
@@ -267,10 +267,8 @@ typedef struct luaL_Stream {
 #define luaL_optlong(L,n,d)	((long)luaL_optinteger(L, (n), (d)))
 
 #endif
-/* }============================================================ */
+/** @$1============================================================ */
 
 
 
 #endif
-
-

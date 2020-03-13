@@ -1,8 +1,8 @@
-/*
-** $Id: lfunc.c $
-** Auxiliary functions to manipulate prototypes and closures
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: lfunc.c $
+ ** Auxiliary functions to manipulate prototypes and closures
+ ** See Copyright Notice in lua.h
+ */
 
 #define lfunc_c
 #define LUA_CORE
@@ -42,9 +42,9 @@ LClosure *luaF_newLclosure (lua_State *L, int nupvals) {
 }
 
 
-/*
-** fill a closure with new closed upvalues
-*/
+/**
+ ** fill a closure with new closed upvalues
+ */
 void luaF_initupvals (lua_State *L, LClosure *cl) {
   int i;
   for (i = 0; i < cl->nupvalues; i++) {
@@ -58,10 +58,10 @@ void luaF_initupvals (lua_State *L, LClosure *cl) {
 }
 
 
-/*
-** Create a new upvalue at the given level, and link it to the list of
-** open upvalues of 'L' after entry 'prev'.
-**/
+/**
+ ** Create a new upvalue at the given level, and link it to the list of
+ ** open upvalues of 'L' after entry 'prev'.
+ **/
 static UpVal *newupval (lua_State *L, int tbc, StkId level, UpVal **prev) {
   GCObject *o = luaC_newobj(L, LUA_VUPVAL, sizeof(UpVal));
   UpVal *uv = gco2upv(o);
@@ -81,10 +81,10 @@ static UpVal *newupval (lua_State *L, int tbc, StkId level, UpVal **prev) {
 }
 
 
-/*
-** Find and reuse, or create if it does not exist, an upvalue
-** at the given level.
-*/
+/**
+ ** Find and reuse, or create if it does not exist, an upvalue
+ ** at the given level.
+ */
 UpVal *luaF_findupval (lua_State *L, StkId level) {
   UpVal **pp = &L->openupval;
   UpVal *p;
@@ -106,10 +106,10 @@ static void callclose (lua_State *L, void *ud) {
 }
 
 
-/*
-** Prepare closing method plus its arguments for object 'obj' with
-** error message 'err'. (This function assumes EXTRA_STACK.)
-*/
+/**
+ ** Prepare closing method plus its arguments for object 'obj' with
+ ** error message 'err'. (This function assumes EXTRA_STACK.)
+ */
 static int prepclosingmethod (lua_State *L, TValue *obj, TValue *err) {
   StkId top = L->top;
   const TValue *tm = luaT_gettmbyobj(L, obj, TM_CLOSE);
@@ -123,10 +123,10 @@ static int prepclosingmethod (lua_State *L, TValue *obj, TValue *err) {
 }
 
 
-/*
-** Raise an error with message 'msg', inserting the name of the
-** local variable at position 'level' in the stack.
-*/
+/**
+ ** Raise an error with message 'msg', inserting the name of the
+ ** local variable at position 'level' in the stack.
+ */
 static void varerror (lua_State *L, StkId level, const char *msg) {
   int idx = cast_int(level - L->ci->func);
   const char *vname = luaG_findlocal(L, L->ci, idx, NULL);
@@ -135,18 +135,18 @@ static void varerror (lua_State *L, StkId level, const char *msg) {
 }
 
 
-/*
-** Prepare and call a closing method. If status is OK, code is still
-** inside the original protected call, and so any error will be handled
-** there. Otherwise, a previous error already activated the original
-** protected call, and so the call to the closing method must be
-** protected here. (A status == CLOSEPROTECT behaves like a previous
-** error, to also run the closing method in protected mode).
-** If status is OK, the call to the closing method will be pushed
-** at the top of the stack. Otherwise, values are pushed after
-** the 'level' of the upvalue being closed, as everything after
-** that won't be used again.
-*/
+/**
+ ** Prepare and call a closing method. If status is OK, code is still
+ ** inside the original protected call, and so any error will be handled
+ ** there. Otherwise, a previous error already activated the original
+ ** protected call, and so the call to the closing method must be
+ ** protected here. (A status == CLOSEPROTECT behaves like a previous
+ ** error, to also run the closing method in protected mode).
+ ** If status is OK, the call to the closing method will be pushed
+ ** at the top of the stack. Otherwise, values are pushed after
+ ** the 'level' of the upvalue being closed, as everything after
+ ** that won't be used again.
+ */
 static int callclosemth (lua_State *L, StkId level, int status) {
   TValue *uv = s2v(level);  /* value being closed */
   if (likely(status == LUA_OK)) {
@@ -177,20 +177,20 @@ static int callclosemth (lua_State *L, StkId level, int status) {
 }
 
 
-/*
-** Try to create a to-be-closed upvalue
-** (can raise a memory-allocation error)
-*/
+/**
+ ** Try to create a to-be-closed upvalue
+ ** (can raise a memory-allocation error)
+ */
 static void trynewtbcupval (lua_State *L, void *ud) {
   newupval(L, 1, cast(StkId, ud), &L->openupval);
 }
 
 
-/*
-** Create a to-be-closed upvalue. If there is a memory error
-** when creating the upvalue, the closing method must be called here,
-** as there is no upvalue to call it later.
-*/
+/**
+ ** Create a to-be-closed upvalue. If there is a memory error
+ ** when creating the upvalue, the closing method must be called here,
+ ** as there is no upvalue to call it later.
+ */
 void luaF_newtbcupval (lua_State *L, StkId level) {
   TValue *obj = s2v(level);
   lua_assert(L->openupval == NULL || uplevel(L->openupval) < level);
@@ -281,10 +281,10 @@ void luaF_freeproto (lua_State *L, Proto *f) {
 }
 
 
-/*
-** Look for n-th local variable at line 'line' in function 'func'.
-** Returns NULL if not found.
-*/
+/**
+ ** Look for n-th local variable at line 'line' in function 'func'.
+ ** Returns NULL if not found.
+ */
 const char *luaF_getlocalname (const Proto *f, int local_number, int pc) {
   int i;
   for (i = 0; i<f->sizelocvars && f->locvars[i].startpc <= pc; i++) {

@@ -1,8 +1,8 @@
-/*
-** $Id: ldebug.h $
-** Auxiliary functions from Debug Interface module
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: ldebug.h $
+ ** Auxiliary functions from Debug Interface module
+ ** See Copyright Notice in lua.h
+ */
 
 #ifndef ldebug_h
 #define ldebug_h
@@ -15,10 +15,10 @@
 
 #define resethookcount(L)	(L->hookcount = L->basehookcount)
 
-/*
-** mark for entries in 'lineinfo' array that has absolute information in
-** 'abslineinfo' array
-*/
+/**
+ ** mark for entries in 'lineinfo' array that has absolute information in
+ ** 'abslineinfo' array
+ */
 #define ABSLINEINFO	(-0x80)
 
 LUAI_FUNC int luaG_getfuncline (const Proto *f, int pc);

@@ -1,8 +1,8 @@
-/*
-** $Id: lvm.c $
-** Lua virtual machine
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: lvm.c $
+ ** Lua virtual machine
+ ** See Copyright Notice in lua.h
+ */
 
 #define lvm_c
 #define LUA_CORE
@@ -31,10 +31,10 @@
 #include "lvm.h"
 
 
-/*
-** By default, use jump tables in the main interpreter loop on gcc
-** and compatible compilers.
-*/
+/**
+ ** By default, use jump tables in the main interpreter loop on gcc
+ ** and compatible compilers.
+ */
 #if !defined(LUA_USE_JUMPTABLE)
 #if defined(__GNUC__)
 #define LUA_USE_JUMPTABLE	1
@@ -45,32 +45,32 @@
 
 
 
-/* limit for table tag-method chains (to avoid infinite loops) */
+/** limit for table tag-method chains (to avoid infinite loops) */
 #define MAXTAGLOOP	2000
 
 
-/*
-** 'l_intfitsf' checks whether a given integer is in the range that
-** can be converted to a float without rounding. Used in comparisons.
-*/
+/**
+ ** 'l_intfitsf' checks whether a given integer is in the range that
+ ** can be converted to a float without rounding. Used in comparisons.
+ */
 
-/* number of bits in the mantissa of a float */
+/** number of bits in the mantissa of a float */
 #define NBM		(l_floatatt(MANT_DIG))
 
-/*
-** Check whether some integers may not fit in a float, testing whether
-** (maxinteger >> NBM) > 0. (That implies (1 << NBM) <= maxinteger.)
-** (The shifts are done in parts, to avoid shifting by more than the size
-** of an integer. In a worst case, NBM == 113 for long double and
-** sizeof(long) == 32.)
-*/
+/**
+ ** Check whether some integers may not fit in a float, testing whether
+ ** (maxinteger >> NBM) > 0. (That implies (1 << NBM) <= maxinteger.)
+ ** (The shifts are done in parts, to avoid shifting by more than the size
+ ** of an integer. In a worst case, NBM == 113 for long double and
+ ** sizeof(long) == 32.)
+ */
 #if ((((LUA_MAXINTEGER >> (NBM / 4)) >> (NBM / 4)) >> (NBM / 4)) \
 	>> (NBM - (3 * (NBM / 4))))  >  0
 
-/* limit for integers that fit in a float */
+/** limit for integers that fit in a float */
 #define MAXINTFITSF	((lua_Unsigned)1 << NBM)
 
-/* check whether 'i' is in the interval [-MAXINTFITSF, MAXINTFITSF] */
+/** check whether 'i' is in the interval [-MAXINTFITSF, MAXINTFITSF] */
 #define l_intfitsf(i)	((MAXINTFITSF + l_castS2U(i)) <= (2 * MAXINTFITSF))
 
 #else  /* all integers fit in a float precisely */
@@ -80,13 +80,13 @@
 #endif
 
 
-/*
-** Try to convert a value from string to a number value.
-** If the value is not a string or is a string not representing
-** a valid numeral (or if coercions from strings to numbers
-** are disabled via macro 'cvt2num'), do not modify 'result'
-** and return 0.
-*/
+/**
+ ** Try to convert a value from string to a number value.
+ ** If the value is not a string or is a string not representing
+ ** a valid numeral (or if coercions from strings to numbers
+ ** are disabled via macro 'cvt2num'), do not modify 'result'
+ ** and return 0.
+ */
 static int l_strton (const TValue *obj, TValue *result) {
   lua_assert(obj != result);
   if (!cvt2num(obj))  /* is object not a string? */
@@ -96,10 +96,10 @@ static int l_strton (const TValue *obj, TValue *result) {
 }
 
 
-/*
-** Try to convert a value to a float. The float case is already handled
-** by the macro 'tonumber'.
-*/
+/**
+ ** Try to convert a value to a float. The float case is already handled
+ ** by the macro 'tonumber'.
+ */
 int luaV_tonumber_ (const TValue *obj, lua_Number *n) {
   TValue v;
   if (ttisinteger(obj)) {
@@ -115,9 +115,9 @@ int luaV_tonumber_ (const TValue *obj, lua_Number *n) {
 }
 
 
-/*
-** try to convert a float to an integer, rounding according to 'mode'.
-*/
+/**
+ ** try to convert a float to an integer, rounding according to 'mode'.
+ */
 int luaV_flttointeger (lua_Number n, lua_Integer *p, F2Imod mode) {
   lua_Number f = l_floor(n);
   if (n != f) {  /* not an integral value? */
@@ -129,11 +129,11 @@ int luaV_flttointeger (lua_Number n, lua_Integer *p, F2Imod mode) {
 }
 
 
-/*
-** try to convert a value to an integer, rounding according to 'mode',
-** without string coercion.
-** ("Fast track" handled by macro 'tointegerns'.)
-*/
+/**
+ ** try to convert a value to an integer, rounding according to 'mode',
+ ** without string coercion.
+ ** ("Fast track" handled by macro 'tointegerns'.)
+ */
 int luaV_tointegerns (const TValue *obj, lua_Integer *p, F2Imod mode) {
   if (ttisfloat(obj))
     return luaV_flttointeger(fltvalue(obj), p, mode);
@@ -146,9 +146,9 @@ int luaV_tointegerns (const TValue *obj, lua_Integer *p, F2Imod mode) {
 }
 
 
-/*
-** try to convert a value to an integer.
-*/
+/**
+ ** try to convert a value to an integer.
+ */
 int luaV_tointeger (const TValue *obj, lua_Integer *p, F2Imod mode) {
   TValue v;
   if (l_strton(obj, &v))  /* does 'obj' point to a numerical string? */
@@ -157,22 +157,22 @@ int luaV_tointeger (const TValue *obj, lua_Integer *p, F2Imod mode) {
 }
 
 
-/*
-** Try to convert a 'for' limit to an integer, preserving the semantics
-** of the loop. Return true if the loop must not run; otherwise, '*p'
-** gets the integer limit.
-** (The following explanation assumes a positive step; it is valid for
-** negative steps mutatis mutandis.)
-** If the limit is an integer or can be converted to an integer,
-** rounding down, that is the limit.
-** Otherwise, check whether the limit can be converted to a float. If
-** the float is too large, clip it to LUA_MAXINTEGER.  If the float
-** is too negative, the loop should not run, because any initial
-** integer value is greater than such limit; so, the function returns
-** true to signal that. (For this latter case, no integer limit would be
-** correct; even a limit of LUA_MININTEGER would run the loop once for
-** an initial value equal to LUA_MININTEGER.)
-*/
+/**
+ ** Try to convert a 'for' limit to an integer, preserving the semantics
+ ** of the loop. Return true if the loop must not run; otherwise, '*p'
+ ** gets the integer limit.
+ ** (The following explanation assumes a positive step; it is valid for
+ ** negative steps mutatis mutandis.)
+ ** If the limit is an integer or can be converted to an integer,
+ ** rounding down, that is the limit.
+ ** Otherwise, check whether the limit can be converted to a float. If
+ ** the float is too large, clip it to LUA_MAXINTEGER.  If the float
+ ** is too negative, the loop should not run, because any initial
+ ** integer value is greater than such limit; so, the function returns
+ ** true to signal that. (For this latter case, no integer limit would be
+ ** correct; even a limit of LUA_MININTEGER would run the loop once for
+ ** an initial value equal to LUA_MININTEGER.)
+ */
 static int forlimit (lua_State *L, lua_Integer init, const TValue *lim,
                                    lua_Integer *p, lua_Integer step) {
   if (!luaV_tointeger(lim, p, (step < 0 ? F2Iceil : F2Ifloor))) {
@@ -194,15 +194,15 @@ static int forlimit (lua_State *L, lua_Integer init, const TValue *lim,
 }
 
 
-/*
-** Prepare a numerical for loop (opcode OP_FORPREP).
-** Return true to skip the loop. Otherwise,
-** after preparation, stack will be as follows:
-**   ra : internal index (safe copy of the control variable)
-**   ra + 1 : loop counter (integer loops) or limit (float loops)
-**   ra + 2 : step
-**   ra + 3 : control variable
-*/
+/**
+ ** Prepare a numerical for loop (opcode OP_FORPREP).
+ ** Return true to skip the loop. Otherwise,
+ ** after preparation, stack will be as follows:
+ **   ra : internal index (safe copy of the control variable)
+ **   ra + 1 : loop counter (integer loops) or limit (float loops)
+ **   ra + 2 : step
+ **   ra + 3 : control variable
+ */
 static int forprep (lua_State *L, StkId ra) {
   TValue *pinit = s2v(ra);
   TValue *plimit = s2v(ra + 1);
@@ -258,11 +258,11 @@ static int forprep (lua_State *L, StkId ra) {
 }
 
 
-/*
-** Execute a step of a float numerical for loop, returning
-** true iff the loop must continue. (The integer case is
-** written online with opcode OP_FORLOOP, for performance.)
-*/
+/**
+ ** Execute a step of a float numerical for loop, returning
+ ** true iff the loop must continue. (The integer case is
+ ** written online with opcode OP_FORLOOP, for performance.)
+ */
 static int floatforloop (StkId ra) {
   lua_Number step = fltvalue(s2v(ra + 2));
   lua_Number limit = fltvalue(s2v(ra + 1));
@@ -279,11 +279,11 @@ static int floatforloop (StkId ra) {
 }
 
 
-/*
-** Finish the table access 'val = t[key]'.
-** if 'slot' is NULL, 't' is not a table; otherwise, 'slot' points to
-** t[k] entry (which must be empty).
-*/
+/**
+ ** Finish the table access 'val = t[key]'.
+ ** if 'slot' is NULL, 't' is not a table; otherwise, 'slot' points to
+ ** t[k] entry (which must be empty).
+ */
 void luaV_finishget (lua_State *L, const TValue *t, TValue *key, StkId val,
                       const TValue *slot) {
   int loop;  /* counter to avoid infinite loops */
@@ -320,13 +320,13 @@ void luaV_finishget (lua_State *L, const TValue *t, TValue *key, StkId val,
 }
 
 
-/*
-** Finish a table assignment 't[key] = val'.
-** If 'slot' is NULL, 't' is not a table.  Otherwise, 'slot' points
-** to the entry 't[key]', or to a value with an absent key if there
-** is no such entry.  (The value at 'slot' must be empty, otherwise
-** 'luaV_fastget' would have done the job.)
-*/
+/**
+ ** Finish a table assignment 't[key] = val'.
+ ** If 'slot' is NULL, 't' is not a table.  Otherwise, 'slot' points
+ ** to the entry 't[key]', or to a value with an absent key if there
+ ** is no such entry.  (The value at 'slot' must be empty, otherwise
+ ** 'luaV_fastget' would have done the job.)
+ */
 void luaV_finishset (lua_State *L, const TValue *t, TValue *key,
                      TValue *val, const TValue *slot) {
   int loop;  /* counter to avoid infinite loops */
@@ -368,13 +368,13 @@ void luaV_finishset (lua_State *L, const TValue *t, TValue *key,
 }
 
 
-/*
-** Compare two strings 'ls' x 'rs', returning an integer less-equal-
-** -greater than zero if 'ls' is less-equal-greater than 'rs'.
-** The code is a little tricky because it allows '\0' in the strings
-** and it uses 'strcoll' (to respect locales) for each segments
-** of the strings.
-*/
+/**
+ ** Compare two strings 'ls' x 'rs', returning an integer less-equal-
+ ** -greater than zero if 'ls' is less-equal-greater than 'rs'.
+ ** The code is a little tricky because it allows '\0' in the strings
+ ** and it uses 'strcoll' (to respect locales) for each segments
+ ** of the strings.
+ */
 static int l_strcmp (const TString *ls, const TString *rs) {
   const char *l = getstr(ls);
   size_t ll = tsslen(ls);
@@ -398,17 +398,17 @@ static int l_strcmp (const TString *ls, const TString *rs) {
 }
 
 
-/*
-** Check whether integer 'i' is less than float 'f'. If 'i' has an
-** exact representation as a float ('l_intfitsf'), compare numbers as
-** floats. Otherwise, use the equivalence 'i < f <=> i < ceil(f)'.
-** If 'ceil(f)' is out of integer range, either 'f' is greater than
-** all integers or less than all integers.
-** (The test with 'l_intfitsf' is only for performance; the else
-** case is correct for all values, but it is slow due to the conversion
-** from float to int.)
-** When 'f' is NaN, comparisons must result in false.
-*/
+/**
+ ** Check whether integer 'i' is less than float 'f'. If 'i' has an
+ ** exact representation as a float ('l_intfitsf'), compare numbers as
+ ** floats. Otherwise, use the equivalence 'i < f <=> i < ceil(f)'.
+ ** If 'ceil(f)' is out of integer range, either 'f' is greater than
+ ** all integers or less than all integers.
+ ** (The test with 'l_intfitsf' is only for performance; the else
+ ** case is correct for all values, but it is slow due to the conversion
+ ** from float to int.)
+ ** When 'f' is NaN, comparisons must result in false.
+ */
 static int LTintfloat (lua_Integer i, lua_Number f) {
   if (l_intfitsf(i))
     return luai_numlt(cast_num(i), f);  /* compare them as floats */
@@ -422,10 +422,10 @@ static int LTintfloat (lua_Integer i, lua_Number f) {
 }
 
 
-/*
-** Check whether integer 'i' is less than or equal to float 'f'.
-** See comments on previous function.
-*/
+/**
+ ** Check whether integer 'i' is less than or equal to float 'f'.
+ ** See comments on previous function.
+ */
 static int LEintfloat (lua_Integer i, lua_Number f) {
   if (l_intfitsf(i))
     return luai_numle(cast_num(i), f);  /* compare them as floats */
@@ -439,10 +439,10 @@ static int LEintfloat (lua_Integer i, lua_Number f) {
 }
 
 
-/*
-** Check whether float 'f' is less than integer 'i'.
-** See comments on previous function.
-*/
+/**
+ ** Check whether float 'f' is less than integer 'i'.
+ ** See comments on previous function.
+ */
 static int LTfloatint (lua_Number f, lua_Integer i) {
   if (l_intfitsf(i))
     return luai_numlt(f, cast_num(i));  /* compare them as floats */
@@ -456,10 +456,10 @@ static int LTfloatint (lua_Number f, lua_Integer i) {
 }
 
 
-/*
-** Check whether float 'f' is less than or equal to integer 'i'.
-** See comments on previous function.
-*/
+/**
+ ** Check whether float 'f' is less than or equal to integer 'i'.
+ ** See comments on previous function.
+ */
 static int LEfloatint (lua_Number f, lua_Integer i) {
   if (l_intfitsf(i))
     return luai_numle(f, cast_num(i));  /* compare them as floats */
@@ -473,9 +473,9 @@ static int LEfloatint (lua_Number f, lua_Integer i) {
 }
 
 
-/*
-** Return 'l < r', for numbers.
-*/
+/**
+ ** Return 'l < r', for numbers.
+ */
 static int LTnum (const TValue *l, const TValue *r) {
   lua_assert(ttisnumber(l) && ttisnumber(r));
   if (ttisinteger(l)) {
@@ -495,9 +495,9 @@ static int LTnum (const TValue *l, const TValue *r) {
 }
 
 
-/*
-** Return 'l <= r', for numbers.
-*/
+/**
+ ** Return 'l <= r', for numbers.
+ */
 static int LEnum (const TValue *l, const TValue *r) {
   lua_assert(ttisnumber(l) && ttisnumber(r));
   if (ttisinteger(l)) {
@@ -517,9 +517,9 @@ static int LEnum (const TValue *l, const TValue *r) {
 }
 
 
-/*
-** return 'l < r' for non-numbers.
-*/
+/**
+ ** return 'l < r' for non-numbers.
+ */
 static int lessthanothers (lua_State *L, const TValue *l, const TValue *r) {
   lua_assert(!ttisnumber(l) || !ttisnumber(r));
   if (ttisstring(l) && ttisstring(r))  /* both are strings? */
@@ -529,9 +529,9 @@ static int lessthanothers (lua_State *L, const TValue *l, const TValue *r) {
 }
 
 
-/*
-** Main operation less than; return 'l < r'.
-*/
+/**
+ ** Main operation less than; return 'l < r'.
+ */
 int luaV_lessthan (lua_State *L, const TValue *l, const TValue *r) {
   if (ttisnumber(l) && ttisnumber(r))  /* both operands are numbers? */
     return LTnum(l, r);
@@ -539,9 +539,9 @@ int luaV_lessthan (lua_State *L, const TValue *l, const TValue *r) {
 }
 
 
-/*
-** return 'l <= r' for non-numbers.
-*/
+/**
+ ** return 'l <= r' for non-numbers.
+ */
 static int lessequalothers (lua_State *L, const TValue *l, const TValue *r) {
   lua_assert(!ttisnumber(l) || !ttisnumber(r));
   if (ttisstring(l) && ttisstring(r))  /* both are strings? */
@@ -551,9 +551,9 @@ static int lessequalothers (lua_State *L, const TValue *l, const TValue *r) {
 }
 
 
-/*
-** Main operation less than or equal to; return 'l <= r'.
-*/
+/**
+ ** Main operation less than or equal to; return 'l <= r'.
+ */
 int luaV_lessequal (lua_State *L, const TValue *l, const TValue *r) {
   if (ttisnumber(l) && ttisnumber(r))  /* both operands are numbers? */
     return LEnum(l, r);
@@ -561,10 +561,10 @@ int luaV_lessequal (lua_State *L, const TValue *l, const TValue *r) {
 }
 
 
-/*
-** Main operation for equality of Lua values; return 't1 == t2'.
-** L == NULL means raw equality (no metamethods)
-*/
+/**
+ ** Main operation for equality of Lua values; return 't1 == t2'.
+ ** L == NULL means raw equality (no metamethods)
+ */
 int luaV_equalobj (lua_State *L, const TValue *t1, const TValue *t2) {
   const TValue *tm;
   if (ttypetag(t1) != ttypetag(t2)) {  /* not the same variant? */
@@ -612,13 +612,13 @@ int luaV_equalobj (lua_State *L, const TValue *t1, const TValue *t2) {
 }
 
 
-/* macro used by 'luaV_concat' to ensure that element at 'o' is a string */
+/** macro used by 'luaV_concat' to ensure that element at 'o' is a string */
 #define tostring(L,o)  \
 	(ttisstring(o) || (cvt2str(o) && (luaO_tostring(L, o), 1)))
 
 #define isemptystr(o)	(ttisshrstring(o) && tsvalue(o)->shrlen == 0)
 
-/* copy strings in stack from top - n up to top - 1 to buffer */
+/** copy strings in stack from top - n up to top - 1 to buffer */
 static void copy2buff (StkId top, int n, char *buff) {
   size_t tl = 0;  /* size already copied */
   do {
@@ -629,10 +629,10 @@ static void copy2buff (StkId top, int n, char *buff) {
 }
 
 
-/*
-** Main operation for concatenation: concat 'total' values in the stack,
-** from 'L->top - total' up to 'L->top - 1'.
-*/
+/**
+ ** Main operation for concatenation: concat 'total' values in the stack,
+ ** from 'L->top - total' up to 'L->top - 1'.
+ */
 void luaV_concat (lua_State *L, int total) {
   lua_assert(total >= 2);
   do {
@@ -674,9 +674,9 @@ void luaV_concat (lua_State *L, int total) {
 }
 
 
-/*
-** Main operation 'ra = #rb'.
-*/
+/**
+ ** Main operation 'ra = #rb'.
+ */
 void luaV_objlen (lua_State *L, StkId ra, const TValue *rb) {
   const TValue *tm;
   switch (ttypetag(rb)) {
@@ -706,12 +706,12 @@ void luaV_objlen (lua_State *L, StkId ra, const TValue *rb) {
 }
 
 
-/*
-** Integer division; return 'm // n', that is, floor(m/n).
-** C division truncates its result (rounds towards zero).
-** 'floor(q) == trunc(q)' when 'q >= 0' or when 'q' is integer,
-** otherwise 'floor(q) == trunc(q) - 1'.
-*/
+/**
+ ** Integer division; return 'm // n', that is, floor(m/n).
+ ** C division truncates its result (rounds towards zero).
+ ** 'floor(q) == trunc(q)' when 'q >= 0' or when 'q' is integer,
+ ** otherwise 'floor(q) == trunc(q) - 1'.
+ */
 lua_Integer luaV_idiv (lua_State *L, lua_Integer m, lua_Integer n) {
   if (unlikely(l_castS2U(n) + 1u <= 1u)) {  /* special cases: -1 or 0 */
     if (n == 0)
@@ -727,11 +727,11 @@ lua_Integer luaV_idiv (lua_State *L, lua_Integer m, lua_Integer n) {
 }
 
 
-/*
-** Integer modulus; return 'm % n'. (Assume that C '%' with
-** negative operands follows C99 behavior. See previous comment
-** about luaV_idiv.)
-*/
+/**
+ ** Integer modulus; return 'm % n'. (Assume that C '%' with
+ ** negative operands follows C99 behavior. See previous comment
+ ** about luaV_idiv.)
+ */
 lua_Integer luaV_mod (lua_State *L, lua_Integer m, lua_Integer n) {
   if (unlikely(l_castS2U(n) + 1u <= 1u)) {  /* special cases: -1 or 0 */
     if (n == 0)
@@ -747,9 +747,9 @@ lua_Integer luaV_mod (lua_State *L, lua_Integer m, lua_Integer n) {
 }
 
 
-/*
-** Float modulus
-*/
+/**
+ ** Float modulus
+ */
 lua_Number luaV_modf (lua_State *L, lua_Number m, lua_Number n) {
   lua_Number r;
   luai_nummod(L, m, n, r);
@@ -757,12 +757,12 @@ lua_Number luaV_modf (lua_State *L, lua_Number m, lua_Number n) {
 }
 
 
-/* number of bits in an integer */
+/** number of bits in an integer */
 #define NBITS	cast_int(sizeof(lua_Integer) * CHAR_BIT)
 
-/*
-** Shift left operation. (Shift right just negates 'y'.)
-*/
+/**
+ ** Shift left operation. (Shift right just negates 'y'.)
+ */
 #define luaV_shiftr(x,y)	luaV_shiftl(x,-(y))
 
 lua_Integer luaV_shiftl (lua_Integer x, lua_Integer y) {
@@ -777,10 +777,10 @@ lua_Integer luaV_shiftl (lua_Integer x, lua_Integer y) {
 }
 
 
-/*
-** create a new Lua closure, push it in the stack, and initialize
-** its upvalues.
-*/
+/**
+ ** create a new Lua closure, push it in the stack, and initialize
+ ** its upvalues.
+ */
 static void pushclosure (lua_State *L, Proto *p, UpVal **encup, StkId base,
                          StkId ra) {
   int nup = p->sizeupvalues;
@@ -799,9 +799,9 @@ static void pushclosure (lua_State *L, Proto *p, UpVal **encup, StkId base,
 }
 
 
-/*
-** finish execution of an opcode interrupted by a yield
-*/
+/**
+ ** finish execution of an opcode interrupted by a yield
+ */
 void luaV_finishOp (lua_State *L) {
   CallInfo *ci = L->ci;
   StkId base = ci->func + 1;
@@ -859,11 +859,11 @@ void luaV_finishOp (lua_State *L) {
 
 
 
-/*
-** {==================================================================
-** Macros for arithmetic/bitwise/comparison opcodes in 'luaV_execute'
-** ===================================================================
-*/
+/**
+ ** @{==================================================================
+ ** Macros for arithmetic/bitwise/comparison opcodes in 'luaV_execute'
+ ** ===================================================================
+ */
 
 #define l_addi(L,a,b)	intop(+, a, b)
 #define l_subi(L,a,b)	intop(-, a, b)
@@ -878,10 +878,10 @@ void luaV_finishOp (lua_State *L) {
 #define l_gei(a,b)	(a >= b)
 
 
-/*
-** Arithmetic operations with immediate operands. 'iop' is the integer
-** operation, 'fop' is the float operation.
-*/
+/**
+ ** Arithmetic operations with immediate operands. 'iop' is the integer
+ ** operation, 'fop' is the float operation.
+ */
 #define op_arithI(L,iop,fop) {  \
   TValue *v1 = vRB(i);  \
   int imm = GETARG_sC(i);  \
@@ -896,10 +896,10 @@ void luaV_finishOp (lua_State *L) {
   }}
 
 
-/*
-** Auxiliary function for arithmetic operations over floats and others
-** with two register operands.
-*/
+/**
+ ** Auxiliary function for arithmetic operations over floats and others
+ ** with two register operands.
+ */
 #define op_arithf_aux(L,v1,v2,fop) {  \
   lua_Number n1; lua_Number n2;  \
   if (tonumberns(v1, n1) && tonumberns(v2, n2)) {  \
@@ -907,27 +907,27 @@ void luaV_finishOp (lua_State *L) {
   }}
 
 
-/*
-** Arithmetic operations over floats and others with register operands.
-*/
+/**
+ ** Arithmetic operations over floats and others with register operands.
+ */
 #define op_arithf(L,fop) {  \
   TValue *v1 = vRB(i);  \
   TValue *v2 = vRC(i);  \
   op_arithf_aux(L, v1, v2, fop); }
 
 
-/*
-** Arithmetic operations with K operands for floats.
-*/
+/**
+ ** Arithmetic operations with K operands for floats.
+ */
 #define op_arithfK(L,fop) {  \
   TValue *v1 = vRB(i);  \
   TValue *v2 = KC(i);  \
   op_arithf_aux(L, v1, v2, fop); }
 
 
-/*
-** Arithmetic operations over integers and floats.
-*/
+/**
+ ** Arithmetic operations over integers and floats.
+ */
 #define op_arith_aux(L,v1,v2,iop,fop) {  \
   if (ttisinteger(v1) && ttisinteger(v2)) {  \
     lua_Integer i1 = ivalue(v1); lua_Integer i2 = ivalue(v2);  \
@@ -936,27 +936,27 @@ void luaV_finishOp (lua_State *L) {
   else op_arithf_aux(L, v1, v2, fop); }
 
 
-/*
-** Arithmetic operations with register operands.
-*/
+/**
+ ** Arithmetic operations with register operands.
+ */
 #define op_arith(L,iop,fop) {  \
   TValue *v1 = vRB(i);  \
   TValue *v2 = vRC(i);  \
   op_arith_aux(L, v1, v2, iop, fop); }
 
 
-/*
-** Arithmetic operations with K operands.
-*/
+/**
+ ** Arithmetic operations with K operands.
+ */
 #define op_arithK(L,iop,fop) {  \
   TValue *v1 = vRB(i);  \
   TValue *v2 = KC(i);  \
   op_arith_aux(L, v1, v2, iop, fop); }
 
 
-/*
-** Bitwise operations with constant operand.
-*/
+/**
+ ** Bitwise operations with constant operand.
+ */
 #define op_bitwiseK(L,op) {  \
   TValue *v1 = vRB(i);  \
   TValue *v2 = KC(i);  \
@@ -967,9 +967,9 @@ void luaV_finishOp (lua_State *L) {
   }}
 
 
-/*
-** Bitwise operations with register operands.
-*/
+/**
+ ** Bitwise operations with register operands.
+ */
 #define op_bitwise(L,op) {  \
   TValue *v1 = vRB(i);  \
   TValue *v2 = vRC(i);  \
@@ -979,11 +979,11 @@ void luaV_finishOp (lua_State *L) {
   }}
 
 
-/*
-** Order operations with register operands. 'opn' actually works
-** for all numbers, but the fast track improves performance for
-** integers.
-*/
+/**
+ ** Order operations with register operands. 'opn' actually works
+ ** for all numbers, but the fast track improves performance for
+ ** integers.
+ */
 #define op_order(L,opi,opn,other) {  \
         int cond;  \
         TValue *rb = vRB(i);  \
@@ -999,10 +999,10 @@ void luaV_finishOp (lua_State *L) {
         docondjump(); }
 
 
-/*
-** Order operations with immediate operand. (Immediate operand is
-** always small enough to have an exact representation as a float.)
-*/
+/**
+ ** Order operations with immediate operand. (Immediate operand is
+ ** always small enough to have an exact representation as a float.)
+ */
 #define op_orderI(L,opi,opf,inv,tm) {  \
         int cond;  \
         int im = GETARG_sB(i);  \
@@ -1019,18 +1019,18 @@ void luaV_finishOp (lua_State *L) {
         }  \
         docondjump(); }
 
-/* }================================================================== */
+/** @}================================================================== */
 
 
-/*
-** {==================================================================
-** Function 'luaV_execute': main interpreter loop
-** ===================================================================
-*/
+/**
+ ** @{==================================================================
+ ** Function 'luaV_execute': main interpreter loop
+ ** ===================================================================
+ */
 
-/*
-** some macros for common tasks in 'luaV_execute'
-*/
+/**
+ ** some macros for common tasks in 'luaV_execute'
+ */
 
 
 #define RA(i)	(base+GETARG_A(i))
@@ -1052,54 +1052,54 @@ void luaV_finishOp (lua_State *L) {
 #define updatestack(ci) { if (trap) { updatebase(ci); ra = RA(i); } }
 
 
-/*
-** Execute a jump instruction. The 'updatetrap' allows signals to stop
-** tight loops. (Without it, the local copy of 'trap' could never change.)
-*/
+/**
+ ** Execute a jump instruction. The 'updatetrap' allows signals to stop
+ ** tight loops. (Without it, the local copy of 'trap' could never change.)
+ */
 #define dojump(ci,i,e)	{ pc += GETARG_sJ(i) + e; updatetrap(ci); }
 
 
-/* for test instructions, execute the jump instruction that follows it */
+/** for test instructions, execute the jump instruction that follows it */
 #define donextjump(ci)	{ Instruction ni = *pc; dojump(ci, ni, 1); }
 
-/*
-** do a conditional jump: skip next instruction if 'cond' is not what
-** was expected (parameter 'k'), else do next instruction, which must
-** be a jump.
-*/
+/**
+ ** do a conditional jump: skip next instruction if 'cond' is not what
+ ** was expected (parameter 'k'), else do next instruction, which must
+ ** be a jump.
+ */
 #define docondjump()	if (cond != GETARG_k(i)) pc++; else donextjump(ci);
 
 
-/*
-** Correct global 'pc'.
-*/
+/**
+ ** Correct global 'pc'.
+ */
 #define savepc(L)	(ci->u.l.savedpc = pc)
 
 
-/*
-** Whenever code can raise errors, the global 'pc' and the global
-** 'top' must be correct to report occasional errors.
-*/
+/**
+ ** Whenever code can raise errors, the global 'pc' and the global
+ ** 'top' must be correct to report occasional errors.
+ */
 #define savestate(L,ci)		(savepc(L), L->top = ci->top)
 
 
-/*
-** Protect code that, in general, can raise errors, reallocate the
-** stack, and change the hooks.
-*/
+/**
+ ** Protect code that, in general, can raise errors, reallocate the
+ ** stack, and change the hooks.
+ */
 #define Protect(exp)  (savestate(L,ci), (exp), updatetrap(ci))
 
-/* special version that does not change the top */
+/** special version that does not change the top */
 #define ProtectNT(exp)  (savepc(L), (exp), updatetrap(ci))
 
-/*
-** Protect code that will finish the loop (returns) or can only raise
-** errors. (That is, it will not return to the interpreter main loop
-** after changing the stack or hooks.)
-*/
+/**
+ ** Protect code that will finish the loop (returns) or can only raise
+ ** errors. (That is, it will not return to the interpreter main loop
+ ** after changing the stack or hooks.)
+ */
 #define halfProtect(exp)  (savestate(L,ci), (exp))
 
-/* idem, but without changing the stack */
+/** idem, but without changing the stack */
 #define halfProtectNT(exp)  (savepc(L), (exp))
 
 
@@ -1109,7 +1109,7 @@ void luaV_finishOp (lua_State *L) {
            luai_threadyield(L); }
 
 
-/* fetch an instruction and prepare its execution */
+/** fetch an instruction and prepare its execution */
 #define vmfetch()	{ \
   if (trap) {  /* stack reallocation or hooks? */ \
     trap = luaG_traceexec(L, pc);  /* handle hooks */ \
@@ -1809,4 +1809,4 @@ void luaV_execute (lua_State *L, CallInfo *ci) {
   }
 }
 
-/* }================================================================== */
+/** @}================================================================== */

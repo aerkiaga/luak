@@ -1,8 +1,8 @@
-/*
-** $Id: lauxlib.c $
-** Auxiliary functions for building Lua libraries
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: lauxlib.c $
+ ** Auxiliary functions for building Lua libraries
+ ** See Copyright Notice in lua.h
+ */
 
 #define lauxlib_c
 #define LUA_LIB
@@ -17,10 +17,10 @@
 #include <string.h>
 
 
-/*
-** This file uses only the official API of Lua.
-** Any function declared here could be written as an application function.
-*/
+/**
+ ** This file uses only the official API of Lua.
+ ** Any function declared here could be written as an application function.
+ */
 
 #include "lua.h"
 
@@ -28,16 +28,16 @@
 
 
 #if !defined(MAX_SIZET)
-/* maximum value for size_t */
+/** maximum value for size_t */
 #define MAX_SIZET	((size_t)(~(size_t)0))
 #endif
 
 
-/*
-** {======================================================
-** Traceback
-** =======================================================
-*/
+/**
+ ** @{======================================================
+ ** Traceback
+ ** =======================================================
+ */
 
 
 #define LEVELS1	10	/* size of the first part of the stack */
@@ -45,10 +45,10 @@
 
 
 
-/*
-** Search for 'objidx' in table at index -1. ('objidx' must be an
-** absolute index.) Return 1 + string at top if it found a good name.
-*/
+/**
+ ** Search for 'objidx' in table at index -1. ('objidx' must be an
+ ** absolute index.) Return 1 + string at top if it found a good name.
+ */
 static int findfield (lua_State *L, int objidx, int level) {
   if (level == 0 || !lua_istable(L, -1))
     return 0;  /* not found */
@@ -73,9 +73,9 @@ static int findfield (lua_State *L, int objidx, int level) {
 }
 
 
-/*
-** Search for a name for a function in all loaded modules
-*/
+/**
+ ** Search for a name for a function in all loaded modules
+ */
 static int pushglobalfuncname (lua_State *L, lua_Debug *ar) {
   int top = lua_gettop(L);
   lua_getinfo(L, "f", ar);  /* push function */
@@ -163,14 +163,14 @@ LUALIB_API void luaL_traceback (lua_State *L, lua_State *L1,
   luaL_pushresult(&b);
 }
 
-/* }====================================================== */
+/** @}====================================================== */
 
 
-/*
-** {======================================================
-** Error-report functions
-** =======================================================
-*/
+/**
+ ** @{======================================================
+ ** Error-report functions
+ ** =======================================================
+ */
 
 LUALIB_API int luaL_argerror (lua_State *L, int arg, const char *extramsg) {
   lua_Debug ar;
@@ -209,10 +209,10 @@ static void tag_error (lua_State *L, int arg, int tag) {
 }
 
 
-/*
-** The use of 'lua_pushfstring' ensures this function does not
-** need reserved stack space when called.
-*/
+/**
+ ** The use of 'lua_pushfstring' ensures this function does not
+ ** need reserved stack space when called.
+ */
 LUALIB_API void luaL_where (lua_State *L, int level) {
   lua_Debug ar;
   if (lua_getstack(L, level, &ar)) {  /* check function at level */
@@ -226,11 +226,11 @@ LUALIB_API void luaL_where (lua_State *L, int level) {
 }
 
 
-/*
-** Again, the use of 'lua_pushvfstring' ensures this function does
-** not need reserved stack space when called. (At worst, it generates
-** an error with "stack overflow" instead of the given message.)
-*/
+/**
+ ** Again, the use of 'lua_pushvfstring' ensures this function does
+ ** not need reserved stack space when called. (At worst, it generates
+ ** an error with "stack overflow" instead of the given message.)
+ */
 LUALIB_API int luaL_error (lua_State *L, const char *fmt, ...) {
   va_list argp;
   va_start(argp, fmt);
@@ -266,9 +266,9 @@ LUALIB_API int luaL_fileresult (lua_State *L, int stat, const char *fname) {
 
 #include <sys/wait.h>
 
-/*
-** use appropriate macros to interpret 'pclose' return status
-*/
+/**
+ ** use appropriate macros to interpret 'pclose' return status
+ */
 #define l_inspectstat(stat,what)  \
    if (WIFEXITED(stat)) { stat = WEXITSTATUS(stat); } \
    else if (WIFSIGNALED(stat)) { stat = WTERMSIG(stat); what = "signal"; }
@@ -298,15 +298,15 @@ LUALIB_API int luaL_execresult (lua_State *L, int stat) {
   }
 }
 
-/* }====================================================== */
+/** @}====================================================== */
 
 
 
-/*
-** {======================================================
-** Userdata's metatable manipulation
-** =======================================================
-*/
+/**
+ ** @{======================================================
+ ** Userdata's metatable manipulation
+ ** =======================================================
+ */
 
 LUALIB_API int luaL_newmetatable (lua_State *L, const char *tname) {
   if (luaL_getmetatable(L, tname) != LUA_TNIL)  /* name already in use? */
@@ -348,14 +348,14 @@ LUALIB_API void *luaL_checkudata (lua_State *L, int ud, const char *tname) {
   return p;
 }
 
-/* }====================================================== */
+/** @}====================================================== */
 
 
-/*
-** {======================================================
-** Argument check functions
-** =======================================================
-*/
+/**
+ ** @{======================================================
+ ** Argument check functions
+ ** =======================================================
+ */
 
 LUALIB_API int luaL_checkoption (lua_State *L, int arg, const char *def,
                                  const char *const lst[]) {
@@ -370,13 +370,13 @@ LUALIB_API int luaL_checkoption (lua_State *L, int arg, const char *def,
 }
 
 
-/*
-** Ensures the stack has at least 'space' extra slots, raising an error
-** if it cannot fulfill the request. (The error handling needs a few
-** extra slots to format the error message. In case of an error without
-** this extra space, Lua will generate the same 'stack overflow' error,
-** but without 'msg'.)
-*/
+/**
+ ** Ensures the stack has at least 'space' extra slots, raising an error
+ ** if it cannot fulfill the request. (The error handling needs a few
+ ** extra slots to format the error message. In case of an error without
+ ** this extra space, Lua will generate the same 'stack overflow' error,
+ ** but without 'msg'.)
+ */
 LUALIB_API void luaL_checkstack (lua_State *L, int space, const char *msg) {
   if (!lua_checkstack(L, space)) {
     if (msg)
@@ -454,16 +454,16 @@ LUALIB_API lua_Integer luaL_optinteger (lua_State *L, int arg,
   return luaL_opt(L, luaL_checkinteger, arg, def);
 }
 
-/* }====================================================== */
+/** @}====================================================== */
 
 
-/*
-** {======================================================
-** Generic Buffer manipulation
-** =======================================================
-*/
+/**
+ ** @{======================================================
+ ** Generic Buffer manipulation
+ ** =======================================================
+ */
 
-/* userdata to box arbitrary data */
+/** userdata to box arbitrary data */
 typedef struct UBox {
   void *box;
   size_t bsize;
@@ -506,17 +506,17 @@ static void newbox (lua_State *L) {
 }
 
 
-/*
-** check whether buffer is using a userdata on the stack as a temporary
-** buffer
-*/
+/**
+ ** check whether buffer is using a userdata on the stack as a temporary
+ ** buffer
+ */
 #define buffonstack(B)	((B)->b != (B)->init.b)
 
 
-/*
-** Compute new size for buffer 'B', enough to accommodate extra 'sz'
-** bytes.
-*/
+/**
+ ** Compute new size for buffer 'B', enough to accommodate extra 'sz'
+ ** bytes.
+ */
 static size_t newbuffsize (luaL_Buffer *B, size_t sz) {
   size_t newsize = B->size * 2;  /* double buffer size */
   if (MAX_SIZET - sz < B->n)  /* overflow in (B->n + sz)? */
@@ -527,11 +527,11 @@ static size_t newbuffsize (luaL_Buffer *B, size_t sz) {
 }
 
 
-/*
-** Returns a pointer to a free area with at least 'sz' bytes in buffer
-** 'B'. 'boxidx' is the relative position in the stack where the
-** buffer's box is or should be.
-*/
+/**
+ ** Returns a pointer to a free area with at least 'sz' bytes in buffer
+ ** 'B'. 'boxidx' is the relative position in the stack where the
+ ** buffer's box is or should be.
+ */
 static char *prepbuffsize (luaL_Buffer *B, size_t sz, int boxidx) {
   if (B->size - B->n >= sz)  /* enough space? */
     return B->b + B->n;
@@ -557,9 +557,9 @@ static char *prepbuffsize (luaL_Buffer *B, size_t sz, int boxidx) {
   }
 }
 
-/*
-** returns a pointer to a free area with at least 'sz' bytes
-*/
+/**
+ ** returns a pointer to a free area with at least 'sz' bytes
+ */
 LUALIB_API char *luaL_prepbuffsize (luaL_Buffer *B, size_t sz) {
   return prepbuffsize(B, sz, -1);
 }
@@ -595,15 +595,15 @@ LUALIB_API void luaL_pushresultsize (luaL_Buffer *B, size_t sz) {
 }
 
 
-/*
-** 'luaL_addvalue' is the only function in the Buffer system where the
-** box (if existent) is not on the top of the stack. So, instead of
-** calling 'luaL_addlstring', it replicates the code using -2 as the
-** last argument to 'prepbuffsize', signaling that the box is (or will
-** be) bellow the string being added to the buffer. (Box creation can
-** trigger an emergency GC, so we should not remove the string from the
-** stack before we have the space guaranteed.)
-*/
+/**
+ ** 'luaL_addvalue' is the only function in the Buffer system where the
+ ** box (if existent) is not on the top of the stack. So, instead of
+ ** calling 'luaL_addlstring', it replicates the code using -2 as the
+ ** last argument to 'prepbuffsize', signaling that the box is (or will
+ ** be) bellow the string being added to the buffer. (Box creation can
+ ** trigger an emergency GC, so we should not remove the string from the
+ ** stack before we have the space guaranteed.)
+ */
 LUALIB_API void luaL_addvalue (luaL_Buffer *B) {
   lua_State *L = B->L;
   size_t len;
@@ -628,16 +628,16 @@ LUALIB_API char *luaL_buffinitsize (lua_State *L, luaL_Buffer *B, size_t sz) {
   return prepbuffsize(B, sz, -1);
 }
 
-/* }====================================================== */
+/** @}====================================================== */
 
 
-/*
-** {======================================================
-** Reference system
-** =======================================================
-*/
+/**
+ ** @{======================================================
+ ** Reference system
+ ** =======================================================
+ */
 
-/* index of free-list header */
+/** index of free-list header */
 #define freelist	0
 
 
@@ -672,14 +672,14 @@ LUALIB_API void luaL_unref (lua_State *L, int t, int ref) {
   }
 }
 
-/* }====================================================== */
+/** @}====================================================== */
 
 
-/*
-** {======================================================
-** Load functions
-** =======================================================
-*/
+/**
+ ** @{======================================================
+ ** Load functions
+ ** =======================================================
+ */
 
 typedef struct LoadF {
   int n;  /* number of pre-read characters */
@@ -729,13 +729,13 @@ static int skipBOM (LoadF *lf) {
 }
 
 
-/*
-** reads the first character of file 'f' and skips an optional BOM mark
-** in its beginning plus its first line if it starts with '#'. Returns
-** true if it skipped the first line.  In any case, '*cp' has the
-** first "valid" character of the file (after the optional BOM and
-** a first-line comment).
-*/
+/**
+ ** reads the first character of file 'f' and skips an optional BOM mark
+ ** in its beginning plus its first line if it starts with '#'. Returns
+ ** true if it skipped the first line.  In any case, '*cp' has the
+ ** first "valid" character of the file (after the optional BOM and
+ ** a first-line comment).
+ */
 static int skipcomment (LoadF *lf, int *cp) {
   int c = *cp = skipBOM(lf);
   if (c == '#') {  /* first line is a comment (Unix exec. file)? */
@@ -814,7 +814,7 @@ LUALIB_API int luaL_loadstring (lua_State *L, const char *s) {
   return luaL_loadbuffer(L, s, strlen(s), s);
 }
 
-/* }====================================================== */
+/** @}====================================================== */
 
 
 
@@ -894,11 +894,11 @@ LUALIB_API const char *luaL_tolstring (lua_State *L, int idx, size_t *len) {
 }
 
 
-/*
-** set functions from list 'l' into table at top - 'nup'; each
-** function gets the 'nup' elements at the top as upvalues.
-** Returns with only the table at the stack.
-*/
+/**
+ ** set functions from list 'l' into table at top - 'nup'; each
+ ** function gets the 'nup' elements at the top as upvalues.
+ ** Returns with only the table at the stack.
+ */
 LUALIB_API void luaL_setfuncs (lua_State *L, const luaL_Reg *l, int nup) {
   luaL_checkstack(L, nup, "too many upvalues");
   for (; l->name != NULL; l++) {  /* fill the table with given functions */
@@ -916,10 +916,10 @@ LUALIB_API void luaL_setfuncs (lua_State *L, const luaL_Reg *l, int nup) {
 }
 
 
-/*
-** ensure that stack[idx][fname] has a table and push that table
-** into the stack
-*/
+/**
+ ** ensure that stack[idx][fname] has a table and push that table
+ ** into the stack
+ */
 LUALIB_API int luaL_getsubtable (lua_State *L, int idx, const char *fname) {
   if (lua_getfield(L, idx, fname) == LUA_TTABLE)
     return 1;  /* table already there */
@@ -934,12 +934,12 @@ LUALIB_API int luaL_getsubtable (lua_State *L, int idx, const char *fname) {
 }
 
 
-/*
-** Stripped-down 'require': After checking "loaded" table, calls 'openf'
-** to open a module, registers the result in 'package.loaded' table and,
-** if 'glb' is true, also registers the result in the global table.
-** Leaves resulting module on the top.
-*/
+/**
+ ** Stripped-down 'require': After checking "loaded" table, calls 'openf'
+ ** to open a module, registers the result in 'package.loaded' table and,
+ ** if 'glb' is true, also registers the result in the global table.
+ ** Leaves resulting module on the top.
+ */
 LUALIB_API void luaL_requiref (lua_State *L, const char *modname,
                                lua_CFunction openf, int glb) {
   luaL_getsubtable(L, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
@@ -1001,12 +1001,12 @@ static int panic (lua_State *L) {
 }
 
 
-/*
-** Emit a warning. '*warnstate' means:
-** 0 - warning system is off;
-** 1 - ready to start a new message;
-** 2 - previous message is to be continued.
-*/
+/**
+ ** Emit a warning. '*warnstate' means:
+ ** 0 - warning system is off;
+ ** 1 - ready to start a new message;
+ ** 2 - previous message is to be continued.
+ */
 static void warnf (void *ud, const char *message, int tocont) {
   int *warnstate = (int *)ud;
   if (*warnstate != 2 && !tocont && *message == '@') {  /* control message? */

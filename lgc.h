@@ -1,8 +1,8 @@
-/*
-** $Id: lgc.h $
-** Garbage Collector
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: lgc.h $
+ ** Garbage Collector
+ ** See Copyright Notice in lua.h
+ */
 
 #ifndef lgc_h
 #define lgc_h
@@ -11,23 +11,23 @@
 #include "lobject.h"
 #include "lstate.h"
 
-/*
-** Collectable objects may have one of three colors: white, which
-** means the object is not marked; gray, which means the
-** object is marked, but its references may be not marked; and
-** black, which means that the object and all its references are marked.
-** The main invariant of the garbage collector, while marking objects,
-** is that a black object can never point to a white one. Moreover,
-** any gray object must be in a "gray list" (gray, grayagain, weak,
-** allweak, ephemeron) so that it can be visited again before finishing
-** the collection cycle. These lists have no meaning when the invariant
-** is not being enforced (e.g., sweep phase).
-*/
+/**
+ ** Collectable objects may have one of three colors: white, which
+ ** means the object is not marked; gray, which means the
+ ** object is marked, but its references may be not marked; and
+ ** black, which means that the object and all its references are marked.
+ ** The main invariant of the garbage collector, while marking objects,
+ ** is that a black object can never point to a white one. Moreover,
+ ** any gray object must be in a "gray list" (gray, grayagain, weak,
+ ** allweak, ephemeron) so that it can be visited again before finishing
+ ** the collection cycle. These lists have no meaning when the invariant
+ ** is not being enforced (e.g., sweep phase).
+ */
 
 
-/*
-** Possible states of the Garbage Collector
-*/
+/**
+ ** Possible states of the Garbage Collector
+ */
 #define GCSpropagate	0
 #define GCSenteratomic	1
 #define GCSatomic	2
@@ -43,20 +43,20 @@
 	(GCSswpallgc <= (g)->gcstate && (g)->gcstate <= GCSswpend)
 
 
-/*
-** macro to tell when main invariant (white objects cannot point to black
-** ones) must be kept. During a collection, the sweep
-** phase may break the invariant, as objects turned white may point to
-** still-black objects. The invariant is restored when sweep ends and
-** all objects are white again.
-*/
+/**
+ ** macro to tell when main invariant (white objects cannot point to black
+ ** ones) must be kept. During a collection, the sweep
+ ** phase may break the invariant, as objects turned white may point to
+ ** still-black objects. The invariant is restored when sweep ends and
+ ** all objects are white again.
+ */
 
 #define keepinvariant(g)	((g)->gcstate <= GCSatomic)
 
 
-/*
-** some useful bit tricks
-*/
+/**
+ ** some useful bit tricks
+ */
 #define resetbits(x,m)		((x) &= cast_byte(~(m)))
 #define setbits(x,m)		((x) |= (m))
 #define testbits(x,m)		((x) & (m))
@@ -67,11 +67,11 @@
 #define testbit(x,b)		testbits(x, bitmask(b))
 
 
-/*
-** Layout for bit use in 'marked' field. First three bits are
-** used for object "age" in generational mode. Last bit is free
-** to be used by respective objects.
-*/
+/**
+ ** Layout for bit use in 'marked' field. First three bits are
+ ** used for object "age" in generational mode. Last bit is free
+ ** to be used by respective objects.
+ */
 #define WHITE0BIT	3  /* object is white (type 0) */
 #define WHITE1BIT	4  /* object is white (type 1) */
 #define BLACKBIT	5  /* object is black */
@@ -99,7 +99,7 @@
 #define luaC_white(g)	cast_byte((g)->currentwhite & WHITEBITS)
 
 
-/* object age in generational mode */
+/** object age in generational mode */
 #define G_NEW		0	/* created in current cycle */
 #define G_SURVIVAL	1	/* created in previous cycle */
 #define G_OLD0		2	/* marked old by frw. barrier in this cycle */
@@ -118,44 +118,44 @@
 	check_exp(getage(o) == (f), (o)->marked ^= ((f)^(t)))
 
 
-/* Default Values for GC parameters */
+/** Default Values for GC parameters */
 #define LUAI_GENMAJORMUL         100
 #define LUAI_GENMINORMUL         20
 
-/* wait memory to double before starting new cycle */
+/** wait memory to double before starting new cycle */
 #define LUAI_GCPAUSE    200
 
-/*
-** some gc parameters are stored divided by 4 to allow a maximum value
-** up to 1023 in a 'lu_byte'.
-*/
+/**
+ ** some gc parameters are stored divided by 4 to allow a maximum value
+ ** up to 1023 in a 'lu_byte'.
+ */
 #define getgcparam(p)	((p) * 4)
 #define setgcparam(p,v)	((p) = (v) / 4)
 
 #define LUAI_GCMUL      100
 
-/* how much to allocate before next GC step (log2) */
+/** how much to allocate before next GC step (log2) */
 #define LUAI_GCSTEPSIZE 13      /* 8 KB */
 
 
-/*
-** Check whether the declared GC mode is generational. While in
-** generational mode, the collector can go temporarily to incremental
-** mode to improve performance. This is signaled by 'g->lastatomic != 0'.
-*/
+/**
+ ** Check whether the declared GC mode is generational. While in
+ ** generational mode, the collector can go temporarily to incremental
+ ** mode to improve performance. This is signaled by 'g->lastatomic != 0'.
+ */
 #define isdecGCmodegen(g)	(g->gckind == KGC_GEN || g->lastatomic != 0)
 
-/*
-** Does one step of collection when debt becomes positive. 'pre'/'pos'
-** allows some adjustments to be done only when needed. macro
-** 'condchangemem' is used only for heavy tests (forcing a full
-** GC cycle on every opportunity)
-*/
+/**
+ ** Does one step of collection when debt becomes positive. 'pre'/'pos'
+ ** allows some adjustments to be done only when needed. macro
+ ** 'condchangemem' is used only for heavy tests (forcing a full
+ ** GC cycle on every opportunity)
+ */
 #define luaC_condGC(L,pre,pos) \
 	{ if (G(L)->GCdebt > 0) { pre; luaC_step(L); pos;}; \
 	  condchangemem(L,pre,pos); }
 
-/* more often than not, 'pre'/'pos' are empty */
+/** more often than not, 'pre'/'pos' are empty */
 #define luaC_checkGC(L)		luaC_condGC(L,(void)0,(void)0)
 
 

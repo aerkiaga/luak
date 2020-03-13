@@ -1,8 +1,8 @@
-/*
-** $Id: loslib.c $
-** Standard Operating System library
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: loslib.c $
+ ** Standard Operating System library
+ ** See Copyright Notice in lua.h
+ */
 
 #define loslib_c
 #define LUA_LIB
@@ -21,22 +21,22 @@
 #include "lualib.h"
 
 
-/*
-** {==================================================================
-** List of valid conversion specifiers for the 'strftime' function;
-** options are grouped by length; group of length 2 start with '||'.
-** ===================================================================
-*/
+/**
+ ** @{==================================================================
+ ** List of valid conversion specifiers for the 'strftime' function;
+ ** options are grouped by length; group of length 2 start with '||'.
+ ** ===================================================================
+ */
 #if !defined(LUA_STRFTIMEOPTIONS)	/* { */
 
-/* options for ANSI C 89 (only 1-char options) */
+/** options for ANSI C 89 (only 1-char options) */
 #define L_STRFTIMEC89		"aAbBcdHIjmMpSUwWxXyYZ%"
 
-/* options for ISO C 99 and POSIX */
+/** options for ISO C 99 and POSIX */
 #define L_STRFTIMEC99 "aAbBcCdDeFgGhHIjmMnprRStTuUVwWxXyYzZ%" \
     "||" "EcECExEXEyEY" "OdOeOHOIOmOMOSOuOUOVOwOWOy"  /* two-char options */
 
-/* options for Windows */
+/** options for Windows */
 #define L_STRFTIMEWIN "aAbBcdHIjmMpSUwWxXyYzZ%" \
     "||" "#c#x#d#H#I#j#m#M#S#U#w#W#y#Y"  /* two-char options */
 
@@ -47,18 +47,18 @@
 #endif
 
 #endif					/* } */
-/* }================================================================== */
+/** @}================================================================== */
 
 
-/*
-** {==================================================================
-** Configuration for time-related stuff
-** ===================================================================
-*/
+/**
+ ** @{==================================================================
+ ** Configuration for time-related stuff
+ ** ===================================================================
+ */
 
-/*
-** type to represent time_t in Lua
-*/
+/**
+ ** type to represent time_t in Lua
+ */
 #if !defined(LUA_NUMTIME)	/* { */
 
 #define l_timet			lua_Integer
@@ -75,10 +75,10 @@
 
 
 #if !defined(l_gmtime)		/* { */
-/*
-** By default, Lua uses gmtime/localtime, except when POSIX is available,
-** where it uses gmtime_r/localtime_r
-*/
+/**
+ ** By default, Lua uses gmtime/localtime, except when POSIX is available,
+ ** where it uses gmtime_r/localtime_r
+ */
 
 #if defined(LUA_USE_POSIX)	/* { */
 
@@ -87,7 +87,7 @@
 
 #else				/* }{ */
 
-/* ISO C definitions */
+/** ISO C definitions */
 #define l_gmtime(t,r)		((void)(r)->tm_sec, gmtime(t))
 #define l_localtime(t,r)  	((void)(r)->tm_sec, localtime(t))
 
@@ -95,16 +95,16 @@
 
 #endif				/* } */
 
-/* }================================================================== */
+/** @}================================================================== */
 
 
-/*
-** {==================================================================
-** Configuration for 'tmpnam':
-** By default, Lua uses tmpnam except when POSIX is available, where
-** it uses mkstemp.
-** ===================================================================
-*/
+/**
+ ** @{==================================================================
+ ** Configuration for 'tmpnam':
+ ** By default, Lua uses tmpnam except when POSIX is available, where
+ ** it uses mkstemp.
+ ** ===================================================================
+ */
 #if !defined(lua_tmpnam)	/* { */
 
 #if defined(LUA_USE_POSIX)	/* { */
@@ -125,14 +125,14 @@
 
 #else				/* }{ */
 
-/* ISO C definitions */
+/** ISO C definitions */
 #define LUA_TMPNAMBUFSIZE	L_tmpnam
 #define lua_tmpnam(b,e)		{ e = (tmpnam(b) == NULL); }
 
 #endif				/* } */
 
 #endif				/* } */
-/* }================================================================== */
+/** @}================================================================== */
 
 
 
@@ -185,23 +185,23 @@ static int os_clock (lua_State *L) {
 }
 
 
-/*
-** {======================================================
-** Time/Date operations
-** { year=%Y, month=%m, day=%d, hour=%H, min=%M, sec=%S,
-**   wday=%w+1, yday=%j, isdst=? }
-** =======================================================
-*/
+/**
+ ** @{======================================================
+ ** Time/Date operations
+ ** { year=%Y, month=%m, day=%d, hour=%H, min=%M, sec=%S,
+ **   wday=%w+1, yday=%j, isdst=? }
+ ** =======================================================
+ */
 
-/*
-** About the overflow check: an overflow cannot occur when time
-** is represented by a lua_Integer, because either lua_Integer is
-** large enough to represent all int fields or it is not large enough
-** to represent a time that cause a field to overflow.  However, if
-** times are represented as doubles and lua_Integer is int, then the
-** time 0x1.e1853b0d184f6p+55 would cause an overflow when adding 1900
-** to compute the year.
-*/
+/**
+ ** About the overflow check: an overflow cannot occur when time
+ ** is represented by a lua_Integer, because either lua_Integer is
+ ** large enough to represent all int fields or it is not large enough
+ ** to represent a time that cause a field to overflow.  However, if
+ ** times are represented as doubles and lua_Integer is int, then the
+ ** time 0x1.e1853b0d184f6p+55 would cause an overflow when adding 1900
+ ** to compute the year.
+ */
 static void setfield (lua_State *L, const char *key, int value, int delta) {
   #if (defined(LUA_NUMTIME) && LUA_MAXINTEGER <= INT_MAX)
     if (value > LUA_MAXINTEGER - delta)
@@ -220,9 +220,9 @@ static void setboolfield (lua_State *L, const char *key, int value) {
 }
 
 
-/*
-** Set all fields from structure 'tm' in the table on top of the stack
-*/
+/**
+ ** Set all fields from structure 'tm' in the table on top of the stack
+ */
 static void setallfields (lua_State *L, struct tm *stm) {
   setfield(L, "year", stm->tm_year, 1900);
   setfield(L, "month", stm->tm_mon, 1);
@@ -293,7 +293,7 @@ static time_t l_checktime (lua_State *L, int arg) {
 }
 
 
-/* maximum size for an individual 'strftime' item */
+/** maximum size for an individual 'strftime' item */
 #define SIZETIMEFMT	250
 
 
@@ -372,7 +372,7 @@ static int os_difftime (lua_State *L) {
   return 1;
 }
 
-/* }====================================================== */
+/** @}====================================================== */
 
 
 static int os_setlocale (lua_State *L) {
@@ -415,7 +415,7 @@ static const luaL_Reg syslib[] = {
   {NULL, NULL}
 };
 
-/* }====================================================== */
+/** @}====================================================== */
 
 
 

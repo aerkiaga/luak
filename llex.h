@@ -1,8 +1,8 @@
-/*
-** $Id: llex.h $
-** Lexical Analyzer
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: llex.h $
+ ** Lexical Analyzer
+ ** See Copyright Notice in lua.h
+ */
 
 #ifndef llex_h
 #define llex_h
@@ -19,10 +19,10 @@
 #endif
 
 
-/*
+/**
 * WARNING: if you change the order of this enumeration,
 * grep "ORDER RESERVED"
-*/
+ */
 enum RESERVED {
   /* terminal symbols denoted by reserved words */
   TK_AND = FIRST_RESERVED, TK_BREAK,
@@ -36,7 +36,7 @@ enum RESERVED {
   TK_FLT, TK_INT, TK_NAME, TK_STRING
 };
 
-/* number of reserved words */
+/** number of reserved words */
 #define NUM_RESERVED	(cast_int(TK_WHILE-FIRST_RESERVED + 1))
 
 
@@ -53,7 +53,7 @@ typedef struct Token {
 } Token;
 
 
-/* state of the lexer plus state of the parser when shared by all
+/** state of the lexer plus state of the parser when shared by all
    functions */
 typedef struct LexState {
   int current;  /* current character (charint) */

@@ -1,8 +1,8 @@
-/*
-** $Id: ltests.c $
-** Internal Module for Debugging of the Lua Implementation
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: ltests.c $
+ ** Internal Module for Debugging of the Lua Implementation
+ ** See Copyright Notice in lua.h
+ */
 
 #define ltests_c
 #define LUA_CORE
@@ -35,9 +35,9 @@
 
 
 
-/*
-** The whole module only makes sense with LUA_DEBUG on
-*/
+/**
+ ** The whole module only makes sense with LUA_DEBUG on
+ */
 #if defined(LUA_DEBUG)
 
 
@@ -79,16 +79,16 @@ static int tpanic (lua_State *L) {
 }
 
 
-/*
-** Warning function for tests. First, it concatenates all parts of
-** a warning in buffer 'buff'. Then, it has three modes:
-** - 0.normal: messages starting with '#' are shown on standard output;
-** - other messages abort the tests (they represent real warning
-** conditions; the standard tests should not generate these conditions
-** unexpectedly);
-** - 1.allow: all messages are shown;
-** - 2.store: all warnings go to the global '_WARN';
-*/
+/**
+ ** Warning function for tests. First, it concatenates all parts of
+ ** a warning in buffer 'buff'. Then, it has three modes:
+ ** - 0.normal: messages starting with '#' are shown on standard output;
+ ** - other messages abort the tests (they represent real warning
+ ** conditions; the standard tests should not generate these conditions
+ ** unexpectedly);
+ ** - 1.allow: all messages are shown;
+ ** - 2.store: all warnings go to the global '_WARN';
+ */
 static void warnf (void *ud, const char *msg, int tocont) {
   lua_State *L = cast(lua_State *, ud);
   static char buff[200] = "";  /* should be enough for tests... */
@@ -152,11 +152,11 @@ static void warnf (void *ud, const char *msg, int tocont) {
 }
 
 
-/*
-** {======================================================================
-** Controlled version for realloc.
-** =======================================================================
-*/
+/**
+ ** @{======================================================================
+ ** Controlled version for realloc.
+ ** =======================================================================
+ */
 
 #define MARK		0x55  /* 01010101 (a nice pattern) */
 
@@ -171,13 +171,13 @@ typedef union Header {
 
 #if !defined(EXTERNMEMCHECK)
 
-/* full memory check */
+/** full memory check */
 #define MARKSIZE	16  /* size of marks after each block */
 #define fillmem(mem,size)	memset(mem, -MARK, size)
 
 #else
 
-/* external memory check: don't do it twice */
+/** external memory check: don't do it twice */
 #define MARKSIZE	0
 #define fillmem(mem,size)	/* empty */
 
@@ -261,26 +261,26 @@ void *debug_realloc (void *ud, void *b, size_t oldsize, size_t size) {
 }
 
 
-/* }====================================================================== */
+/** @}====================================================================== */
 
 
 
-/*
-** {======================================================
-** Functions to check memory consistency
-** =======================================================
-*/
+/**
+ ** @{======================================================
+ ** Functions to check memory consistency
+ ** =======================================================
+ */
 
 
-/*
-** Check GC invariants. For incremental mode, a black object cannot
-** point to a white one. For generational mode, really old objects
-** cannot point to young objects. Both old1 and touched2 objects
-** cannot point to new objects (but can point to survivals).
-** (Threads and open upvalues, despite being marked "really old",
-** continue to be visited in all collections, and therefore can point to
-** new objects. They, and only they, are old but gray.)
-*/
+/**
+ ** Check GC invariants. For incremental mode, a black object cannot
+ ** point to a white one. For generational mode, really old objects
+ ** cannot point to young objects. Both old1 and touched2 objects
+ ** cannot point to new objects (but can point to survivals).
+ ** (Threads and open upvalues, despite being marked "really old",
+ ** continue to be visited in all collections, and therefore can point to
+ ** new objects. They, and only they, are old but gray.)
+ */
 static int testobjref1 (global_State *g, GCObject *f, GCObject *t) {
   if (isdead(g,t)) return 0;
   if (issweepphase(g))
@@ -359,10 +359,10 @@ static void checkudata (global_State *g, Udata *u) {
 }
 
 
-/*
-** All marks are conditional because a GC may happen while the
-** prototype is still being created
-*/
+/**
+ ** All marks are conditional because a GC may happen while the
+ ** prototype is still being created
+ */
 static void checkproto (global_State *g, Proto *f) {
   int i;
   GCObject *fgc = obj2gco(f);
@@ -475,17 +475,17 @@ static void checkrefs (global_State *g, GCObject *o) {
 }
 
 
-/*
-** Check consistency of an object:
-** - Dead objects can only happen in the 'allgc' list during a sweep
-** phase (controlled by the caller through 'maybedead').
-** - During pause, all objects must be white.
-** - In generational mode:
-**   * objects must be old enough for their lists ('listage').
-**   * old objects cannot be white.
-**   * old objects must be black, except for 'touched1', 'old0',
-** threads, and open upvalues.
-*/
+/**
+ ** Check consistency of an object:
+ ** - Dead objects can only happen in the 'allgc' list during a sweep
+ ** phase (controlled by the caller through 'maybedead').
+ ** - During pause, all objects must be white.
+ ** - In generational mode:
+ **   * objects must be old enough for their lists ('listage').
+ **   * old objects cannot be white.
+ **   * old objects must be black, except for 'touched1', 'old0',
+ ** threads, and open upvalues.
+ */
 static void checkobject (global_State *g, GCObject *o, int maybedead,
                          int listage) {
   if (isdead(g, o))
@@ -524,9 +524,9 @@ static void checkgraylist (global_State *g, GCObject *o) {
 }
 
 
-/*
-** Check objects in gray lists.
-*/
+/**
+ ** Check objects in gray lists.
+ */
 static void checkgrays (global_State *g) {
   if (!keepinvariant(g)) return;
   checkgraylist(g, g->gray);
@@ -591,15 +591,15 @@ int lua_checkmemory (lua_State *L) {
   return 0;
 }
 
-/* }====================================================== */
+/** @}====================================================== */
 
 
 
-/*
-** {======================================================
-** Disassembler
-** =======================================================
-*/
+/**
+ ** @{======================================================
+ ** Disassembler
+ ** =======================================================
+ */
 
 
 static char *buildop (Proto *p, int pc, char *buff) {
@@ -736,7 +736,7 @@ static int listlocals (lua_State *L) {
   return i-1;
 }
 
-/* }====================================================== */
+/** @}====================================================== */
 
 
 
@@ -1155,9 +1155,9 @@ static int log2_aux (lua_State *L) {
 
 struct Aux { jmp_buf jb; const char *paniccode; lua_State *L; };
 
-/*
-** does a long-jump back to "main program".
-*/
+/**
+ ** does a long-jump back to "main program".
+ */
 static int panicback (lua_State *L) {
   struct Aux *b;
   lua_checkstack(L, 1);  /* open space for 'Aux' struct */
@@ -1199,12 +1199,12 @@ static int checkpanic (lua_State *L) {
 
 
 
-/*
-** {====================================================================
-** function to test the API with C. It interprets a kind of assembler
-** language with calls to the API, so the test can be driven by Lua code
-** =====================================================================
-*/
+/**
+ ** @{====================================================================
+ ** function to test the API with C. It interprets a kind of assembler
+ ** language with calls to the API, so the test can be driven by Lua code
+ ** =====================================================================
+ */
 
 
 static void sethookaux (lua_State *L, int mask, int count, const char *code);
@@ -1294,14 +1294,14 @@ static void pushcode (lua_State *L, int code) {
 static int testC (lua_State *L);
 static int Cfunck (lua_State *L, int status, lua_KContext ctx);
 
-/*
-** arithmetic operation encoding for 'arith' instruction
-** LUA_OPIDIV  -> \
-** LUA_OPSHL   -> <
-** LUA_OPSHR   -> >
-** LUA_OPUNM   -> _
-** LUA_OPBNOT  -> !
-*/
+/**
+ ** arithmetic operation encoding for 'arith' instruction
+ ** LUA_OPIDIV  -> \
+ ** LUA_OPSHL   -> <
+ ** LUA_OPSHR   -> >
+ ** LUA_OPUNM   -> _
+ ** LUA_OPBNOT  -> !
+ */
 static const char ops[] = "+-*%^/\\&|~<>_!";
 
 static int runC (lua_State *L, lua_State *L1, const char *pc) {
@@ -1720,18 +1720,18 @@ static int makeCfunc (lua_State *L) {
 }
 
 
-/* }====================================================== */
+/** @}====================================================== */
 
 
-/*
-** {======================================================
-** tests for C hooks
-** =======================================================
-*/
+/**
+ ** @{======================================================
+ ** tests for C hooks
+ ** =======================================================
+ */
 
-/*
-** C hook that runs the C script stored in registry.C_HOOK[L]
-*/
+/**
+ ** C hook that runs the C script stored in registry.C_HOOK[L]
+ */
 static void Chook (lua_State *L, lua_Debug *ar) {
   const char *scpt;
   const char *const events [] = {"call", "ret", "line", "count", "tailcall"};
@@ -1746,9 +1746,9 @@ static void Chook (lua_State *L, lua_Debug *ar) {
 }
 
 
-/*
-** sets 'registry.C_HOOK[L] = scpt' and sets 'Chook' as a hook
-*/
+/**
+ ** sets 'registry.C_HOOK[L] = scpt' and sets 'Chook' as a hook
+ */
 static void sethookaux (lua_State *L, int mask, int count, const char *scpt) {
   if (*scpt == '\0') {  /* no script? */
     lua_sethook(L, NULL, 0, 0);  /* turn off hooks */
@@ -1802,7 +1802,7 @@ static int coresume (lua_State *L) {
   }
 }
 
-/* }====================================================== */
+/** @}====================================================== */
 
 
 

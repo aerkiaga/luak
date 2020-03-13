@@ -1,8 +1,8 @@
-/*
-** $Id: lzio.h $
-** Buffered streams
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: lzio.h $
+ ** Buffered streams
+ ** See Copyright Notice in lua.h
+ */
 
 
 #ifndef lzio_h
@@ -50,7 +50,7 @@ LUAI_FUNC size_t luaZ_read (ZIO* z, void *b, size_t n);	/* read next n bytes */
 
 
 
-/* --------- Private Part ------------------ */
+/** --------- Private Part ------------------ */
 
 struct Zio {
   size_t n;			/* bytes still unread */

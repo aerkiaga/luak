@@ -1,13 +1,13 @@
-/*
-** $Id: lopnames.h $
-** Opcode names
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: lopnames.h $
+ ** Opcode names
+ ** See Copyright Notice in lua.h
+ */
 
 #if !defined(lopnames_h)
 #define lopnames_h
 
-/* ORDER OP */
+/** ORDER OP */
 
 static const char *const opnames[] = {
   "MOVE",

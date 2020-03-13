@@ -1,8 +1,8 @@
-/*
-** $Id: ltable.c $
-** Lua tables (hash)
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: ltable.c $
+ ** Lua tables (hash)
+ ** See Copyright Notice in lua.h
+ */
 
 #define ltable_c
 #define LUA_CORE
@@ -10,18 +10,18 @@
 #include "lprefix.h"
 
 
-/*
-** Implementation of tables (aka arrays, objects, or hash tables).
-** Tables keep its elements in two parts: an array part and a hash part.
-** Non-negative integer keys are all candidates to be kept in the array
-** part. The actual size of the array is the largest 'n' such that
-** more than half the slots between 1 and n are in use.
-** Hash uses a mix of chained scatter table with Brent's variation.
-** A main invariant of these tables is that, if an element is not
-** in its main position (i.e. the 'original' position that its hash gives
-** to it), then the colliding element is in its own main position.
-** Hence even when the load factor reaches 100%, performance remains good.
-*/
+/**
+ ** Implementation of tables (aka arrays, objects, or hash tables).
+ ** Tables keep its elements in two parts: an array part and a hash part.
+ ** Non-negative integer keys are all candidates to be kept in the array
+ ** part. The actual size of the array is the largest 'n' such that
+ ** more than half the slots between 1 and n are in use.
+ ** Hash uses a mix of chained scatter table with Brent's variation.
+ ** A main invariant of these tables is that, if an element is not
+ ** in its main position (i.e. the 'original' position that its hash gives
+ ** to it), then the colliding element is in its own main position.
+ ** Hence even when the load factor reaches 100%, performance remains good.
+ */
 
 #include <math.h>
 #include <limits.h>
@@ -39,32 +39,32 @@
 #include "lvm.h"
 
 
-/*
-** MAXABITS is the largest integer such that MAXASIZE fits in an
-** unsigned int.
-*/
+/**
+ ** MAXABITS is the largest integer such that MAXASIZE fits in an
+ ** unsigned int.
+ */
 #define MAXABITS	cast_int(sizeof(int) * CHAR_BIT - 1)
 
 
-/*
-** MAXASIZE is the maximum size of the array part. It is the minimum
-** between 2^MAXABITS and the maximum size that, measured in bytes,
-** fits in a 'size_t'.
-*/
+/**
+ ** MAXASIZE is the maximum size of the array part. It is the minimum
+ ** between 2^MAXABITS and the maximum size that, measured in bytes,
+ ** fits in a 'size_t'.
+ */
 #define MAXASIZE	luaM_limitN(1u << MAXABITS, TValue)
 
-/*
-** MAXHBITS is the largest integer such that 2^MAXHBITS fits in a
-** signed int.
-*/
+/**
+ ** MAXHBITS is the largest integer such that 2^MAXHBITS fits in a
+ ** signed int.
+ */
 #define MAXHBITS	(MAXABITS - 1)
 
 
-/*
-** MAXHSIZE is the maximum size of the hash part. It is the minimum
-** between 2^MAXHBITS and the maximum size such that, measured in bytes,
-** it fits in a 'size_t'.
-*/
+/**
+ ** MAXHSIZE is the maximum size of the hash part. It is the minimum
+ ** between 2^MAXHBITS and the maximum size such that, measured in bytes,
+ ** it fits in a 'size_t'.
+ */
 #define MAXHSIZE	luaM_limitN(1u << MAXHBITS, Node)
 
 
@@ -75,10 +75,10 @@
 #define hashint(t,i)		hashpow2(t, i)
 
 
-/*
-** for some types, it is better to avoid modulus by power of 2, as
-** they tend to have many 2 factors.
-*/
+/**
+ ** for some types, it is better to avoid modulus by power of 2, as
+ ** they tend to have many 2 factors.
+ */
 #define hashmod(t,n)	(gnode(t, ((n) % ((sizenode(t)-1)|1))))
 
 
@@ -97,19 +97,19 @@ static const TValue absentkey = {ABSTKEYCONSTANT};
 
 
 
-/*
-** Hash for floating-point numbers.
-** The main computation should be just
-**     n = frexp(n, &i); return (n * INT_MAX) + i
-** but there are some numerical subtleties.
-** In a two-complement representation, INT_MAX does not has an exact
-** representation as a float, but INT_MIN does; because the absolute
-** value of 'frexp' is smaller than 1 (unless 'n' is inf/NaN), the
-** absolute value of the product 'frexp * -INT_MIN' is smaller or equal
-** to INT_MAX. Next, the use of 'unsigned int' avoids overflows when
-** adding 'i'; the use of '~u' (instead of '-u') avoids problems with
-** INT_MIN.
-*/
+/**
+ ** Hash for floating-point numbers.
+ ** The main computation should be just
+ **     n = frexp(n, &i); return (n * INT_MAX) + i
+ ** but there are some numerical subtleties.
+ ** In a two-complement representation, INT_MAX does not has an exact
+ ** representation as a float, but INT_MIN does; because the absolute
+ ** value of 'frexp' is smaller than 1 (unless 'n' is inf/NaN), the
+ ** absolute value of the product 'frexp * -INT_MIN' is smaller or equal
+ ** to INT_MAX. Next, the use of 'unsigned int' avoids overflows when
+ ** adding 'i'; the use of '~u' (instead of '-u') avoids problems with
+ ** INT_MIN.
+ */
 #if !defined(l_hashfloat)
 static int l_hashfloat (lua_Number n) {
   int i;
@@ -127,12 +127,12 @@ static int l_hashfloat (lua_Number n) {
 #endif
 
 
-/*
-** returns the 'main' position of an element in a table (that is,
-** the index of its hash value). The key comes broken (tag in 'ktt'
-** and value in 'vkl') so that we can call it on keys inserted into
-** nodes.
-*/
+/**
+ ** returns the 'main' position of an element in a table (that is,
+ ** the index of its hash value). The key comes broken (tag in 'ktt'
+ ** and value in 'vkl') so that we can call it on keys inserted into
+ ** nodes.
+ */
 static Node *mainposition (const Table *t, int ktt, const Value *kvl) {
   switch (withvariant(ktt)) {
     case LUA_VNUMINT:
@@ -157,22 +157,22 @@ static Node *mainposition (const Table *t, int ktt, const Value *kvl) {
 }
 
 
-/*
-** Returns the main position of an element given as a 'TValue'
-*/
+/**
+ ** Returns the main position of an element given as a 'TValue'
+ */
 static Node *mainpositionTV (const Table *t, const TValue *key) {
   return mainposition(t, rawtt(key), valraw(key));
 }
 
 
-/*
-** Check whether key 'k1' is equal to the key in node 'n2'.
-** This equality is raw, so there are no metamethods. Floats
-** with integer values have been normalized, so integers cannot
-** be equal to floats. It is assumed that 'eqshrstr' is simply
-** pointer equality, so that short strings are handled in the
-** default case.
-*/
+/**
+ ** Check whether key 'k1' is equal to the key in node 'n2'.
+ ** This equality is raw, so there are no metamethods. Floats
+ ** with integer values have been normalized, so integers cannot
+ ** be equal to floats. It is assumed that 'eqshrstr' is simply
+ ** pointer equality, so that short strings are handled in the
+ ** default case.
+ */
 static int equalkey (const TValue *k1, const Node *n2) {
   if (rawtt(k1) != keytt(n2))  /* not the same variants? */
    return 0;  /* cannot be same key */
@@ -195,17 +195,17 @@ static int equalkey (const TValue *k1, const Node *n2) {
 }
 
 
-/*
-** True if value of 'alimit' is equal to the real size of the array
-** part of table 't'. (Otherwise, the array part must be larger than
-** 'alimit'.)
-*/
+/**
+ ** True if value of 'alimit' is equal to the real size of the array
+ ** part of table 't'. (Otherwise, the array part must be larger than
+ ** 'alimit'.)
+ */
 #define limitequalsasize(t)	(isrealasize(t) || ispow2((t)->alimit))
 
 
-/*
-** Returns the real size of the 'array' array
-*/
+/**
+ ** Returns the real size of the 'array' array
+ */
 LUAI_FUNC unsigned int luaH_realasize (const Table *t) {
   if (limitequalsasize(t))
     return t->alimit;  /* this is the size */
@@ -227,11 +227,11 @@ LUAI_FUNC unsigned int luaH_realasize (const Table *t) {
 }
 
 
-/*
-** Check whether real size of the array is a power of 2.
-** (If it is not, 'alimit' cannot be changed to any other value
-** without changing the real size.)
-*/
+/**
+ ** Check whether real size of the array is a power of 2.
+ ** (If it is not, 'alimit' cannot be changed to any other value
+ ** without changing the real size.)
+ */
 static int ispow2realasize (const Table *t) {
   return (!isrealasize(t) || ispow2(t->alimit));
 }
@@ -248,10 +248,10 @@ static unsigned int setlimittosize (Table *t) {
 
 
 
-/*
-** "Generic" get version. (Not that generic: not valid for integers,
-** which may be in array part, nor for floats with integral values.)
-*/
+/**
+ ** "Generic" get version. (Not that generic: not valid for integers,
+ ** which may be in array part, nor for floats with integral values.)
+ */
 static const TValue *getgeneric (Table *t, const TValue *key) {
   Node *n = mainpositionTV(t, key);
   for (;;) {  /* check whether 'key' is somewhere in the chain */
@@ -267,10 +267,10 @@ static const TValue *getgeneric (Table *t, const TValue *key) {
 }
 
 
-/*
-** returns the index for 'k' if 'k' is an appropriate key to live in
-** the array part of a table, 0 otherwise.
-*/
+/**
+ ** returns the index for 'k' if 'k' is an appropriate key to live in
+ ** the array part of a table, 0 otherwise.
+ */
 static unsigned int arrayindex (lua_Integer k) {
   if (l_castS2U(k) - 1u < MAXASIZE)  /* 'k' in [1, MAXASIZE]? */
     return cast_uint(k);  /* 'key' is an appropriate array index */
@@ -279,11 +279,11 @@ static unsigned int arrayindex (lua_Integer k) {
 }
 
 
-/*
-** returns the index of a 'key' for table traversals. First goes all
-** elements in the array part, then elements in the hash part. The
-** beginning of a traversal is signaled by 0.
-*/
+/**
+ ** returns the index of a 'key' for table traversals. First goes all
+ ** elements in the array part, then elements in the hash part. The
+ ** beginning of a traversal is signaled by 0.
+ */
 static unsigned int findindex (lua_State *L, Table *t, TValue *key,
                                unsigned int asize) {
   unsigned int i;
@@ -330,20 +330,20 @@ static void freehash (lua_State *L, Table *t) {
 }
 
 
-/*
-** {=============================================================
-** Rehash
-** ==============================================================
-*/
+/**
+ ** @{=============================================================
+ ** Rehash
+ ** ==============================================================
+ */
 
-/*
-** Compute the optimal size for the array part of table 't'. 'nums' is a
-** "count array" where 'nums[i]' is the number of integers in the table
-** between 2^(i - 1) + 1 and 2^i. 'pna' enters with the total number of
-** integer keys in the table and leaves with the number of keys that
-** will go to the array part; return the optimal size.  (The condition
-** 'twotoi > 0' in the for loop stops the loop if 'twotoi' overflows.)
-*/
+/**
+ ** Compute the optimal size for the array part of table 't'. 'nums' is a
+ ** "count array" where 'nums[i]' is the number of integers in the table
+ ** between 2^(i - 1) + 1 and 2^i. 'pna' enters with the total number of
+ ** integer keys in the table and leaves with the number of keys that
+ ** will go to the array part; return the optimal size.  (The condition
+ ** 'twotoi > 0' in the for loop stops the loop if 'twotoi' overflows.)
+ */
 static unsigned int computesizes (unsigned int nums[], unsigned int *pna) {
   int i;
   unsigned int twotoi;  /* 2^i (candidate for optimal size) */
@@ -377,11 +377,11 @@ static int countint (lua_Integer key, unsigned int *nums) {
 }
 
 
-/*
-** Count keys in array part of table 't': Fill 'nums[i]' with
-** number of keys that will go into corresponding slice and return
-** total number of non-nil keys.
-*/
+/**
+ ** Count keys in array part of table 't': Fill 'nums[i]' with
+ ** number of keys that will go into corresponding slice and return
+ ** total number of non-nil keys.
+ */
 static unsigned int numusearray (const Table *t, unsigned int *nums) {
   int lg;
   unsigned int ttlg;  /* 2^lg */
@@ -426,13 +426,13 @@ static int numusehash (const Table *t, unsigned int *nums, unsigned int *pna) {
 }
 
 
-/*
-** Creates an array for the hash part of a table with the given
-** size, or reuses the dummy node if size is zero.
-** The computation for size overflow is in two steps: the first
-** comparison ensures that the shift in the second one does not
-** overflow.
-*/
+/**
+ ** Creates an array for the hash part of a table with the given
+ ** size, or reuses the dummy node if size is zero.
+ ** The computation for size overflow is in two steps: the first
+ ** comparison ensures that the shift in the second one does not
+ ** overflow.
+ */
 static void setnodevector (lua_State *L, Table *t, unsigned int size) {
   if (size == 0) {  /* no elements to hash part? */
     t->node = cast(Node *, dummynode);  /* use common 'dummynode' */
@@ -458,9 +458,9 @@ static void setnodevector (lua_State *L, Table *t, unsigned int size) {
 }
 
 
-/*
-** (Re)insert all elements from the hash part of 'ot' into table 't'.
-*/
+/**
+ ** (Re)insert all elements from the hash part of 'ot' into table 't'.
+ */
 static void reinsert (lua_State *L, Table *ot, Table *t) {
   int j;
   int size = sizenode(ot);
@@ -477,9 +477,9 @@ static void reinsert (lua_State *L, Table *ot, Table *t) {
 }
 
 
-/*
-** Exchange the hash part of 't1' and 't2'.
-*/
+/**
+ ** Exchange the hash part of 't1' and 't2'.
+ */
 static void exchangehashpart (Table *t1, Table *t2) {
   lu_byte lsizenode = t1->lsizenode;
   Node *node = t1->node;
@@ -493,19 +493,19 @@ static void exchangehashpart (Table *t1, Table *t2) {
 }
 
 
-/*
-** Resize table 't' for the new given sizes. Both allocations (for
-** the hash part and for the array part) can fail, which creates some
-** subtleties. If the first allocation, for the hash part, fails, an
-** error is raised and that is it. Otherwise, it copies the elements from
-** the shrinking part of the array (if it is shrinking) into the new
-** hash. Then it reallocates the array part.  If that fails, the table
-** is in its original state; the function frees the new hash part and then
-** raises the allocation error. Otherwise, it sets the new hash part
-** into the table, initializes the new part of the array (if any) with
-** nils and reinserts the elements of the old hash back into the new
-** parts of the table.
-*/
+/**
+ ** Resize table 't' for the new given sizes. Both allocations (for
+ ** the hash part and for the array part) can fail, which creates some
+ ** subtleties. If the first allocation, for the hash part, fails, an
+ ** error is raised and that is it. Otherwise, it copies the elements from
+ ** the shrinking part of the array (if it is shrinking) into the new
+ ** hash. Then it reallocates the array part.  If that fails, the table
+ ** is in its original state; the function frees the new hash part and then
+ ** raises the allocation error. Otherwise, it sets the new hash part
+ ** into the table, initializes the new part of the array (if any) with
+ ** nils and reinserts the elements of the old hash back into the new
+ ** parts of the table.
+ */
 void luaH_resize (lua_State *L, Table *t, unsigned int newasize,
                                           unsigned int nhsize) {
   unsigned int i;
@@ -548,9 +548,9 @@ void luaH_resizearray (lua_State *L, Table *t, unsigned int nasize) {
   luaH_resize(L, t, nasize, nsize);
 }
 
-/*
-** nums[i] = number of keys 'k' where 2^(i - 1) < k <= 2^i
-*/
+/**
+ ** nums[i] = number of keys 'k' where 2^(i - 1) < k <= 2^i
+ */
 static void rehash (lua_State *L, Table *t, const TValue *ek) {
   unsigned int asize;  /* optimal size for array part */
   unsigned int na;  /* number of keys in the array part */
@@ -574,9 +574,9 @@ static void rehash (lua_State *L, Table *t, const TValue *ek) {
 
 
 
-/*
-** }=============================================================
-*/
+/**
+ ** @}=============================================================
+ */
 
 
 Table *luaH_new (lua_State *L) {
@@ -611,13 +611,13 @@ static Node *getfreepos (Table *t) {
 
 
 
-/*
-** inserts a new key into a hash table; first, check whether key's main
-** position is free. If not, check whether colliding node is in its main
-** position or not: if it is not, move colliding node to an empty place and
-** put new key in its main position; otherwise (colliding node is in its main
-** position), new key goes to an empty position.
-*/
+/**
+ ** inserts a new key into a hash table; first, check whether key's main
+ ** position is free. If not, check whether colliding node is in its main
+ ** position or not: if it is not, move colliding node to an empty place and
+ ** put new key in its main position; otherwise (colliding node is in its main
+ ** position), new key goes to an empty position.
+ */
 TValue *luaH_newkey (lua_State *L, Table *t, const TValue *key) {
   Node *mp;
   TValue aux;
@@ -672,14 +672,14 @@ TValue *luaH_newkey (lua_State *L, Table *t, const TValue *key) {
 }
 
 
-/*
-** Search function for integers. If integer is inside 'alimit', get it
-** directly from the array part. Otherwise, if 'alimit' is not equal to
-** the real size of the array, key still can be in the array part. In
-** this case, try to avoid a call to 'luaH_realasize' when key is just
-** one more than the limit (so that it can be incremented without
-** changing the real size of the array).
-*/
+/**
+ ** Search function for integers. If integer is inside 'alimit', get it
+ ** directly from the array part. Otherwise, if 'alimit' is not equal to
+ ** the real size of the array, key still can be in the array part. In
+ ** this case, try to avoid a call to 'luaH_realasize' when key is just
+ ** one more than the limit (so that it can be incremented without
+ ** changing the real size of the array).
+ */
 const TValue *luaH_getint (Table *t, lua_Integer key) {
   if (l_castS2U(key) - 1u < t->alimit)  /* 'key' in [1, t->alimit]? */
     return &t->array[key - 1];
@@ -705,9 +705,9 @@ const TValue *luaH_getint (Table *t, lua_Integer key) {
 }
 
 
-/*
-** search function for short strings
-*/
+/**
+ ** search function for short strings
+ */
 const TValue *luaH_getshortstr (Table *t, TString *key) {
   Node *n = hashstr(t, key);
   lua_assert(key->tt == LUA_VSHRSTR);
@@ -735,9 +735,9 @@ const TValue *luaH_getstr (Table *t, TString *key) {
 }
 
 
-/*
-** main search function
-*/
+/**
+ ** main search function
+ */
 const TValue *luaH_get (Table *t, const TValue *key) {
   switch (ttypetag(key)) {
     case LUA_VSHRSTR: return luaH_getshortstr(t, tsvalue(key));
@@ -755,10 +755,10 @@ const TValue *luaH_get (Table *t, const TValue *key) {
 }
 
 
-/*
-** beware: when using this function you probably need to check a GC
-** barrier and invalidate the TM cache.
-*/
+/**
+ ** beware: when using this function you probably need to check a GC
+ ** barrier and invalidate the TM cache.
+ */
 TValue *luaH_set (lua_State *L, Table *t, const TValue *key) {
   const TValue *p = luaH_get(t, key);
   if (!isabstkey(p))
@@ -781,19 +781,19 @@ void luaH_setint (lua_State *L, Table *t, lua_Integer key, TValue *value) {
 }
 
 
-/*
-** Try to find a boundary in the hash part of table 't'. From the
-** caller, we know that 'j' is zero or present and that 'j + 1' is
-** present. We want to find a larger key that is absent from the
-** table, so that we can do a binary search between the two keys to
-** find a boundary. We keep doubling 'j' until we get an absent index.
-** If the doubling would overflow, we try LUA_MAXINTEGER. If it is
-** absent, we are ready for the binary search. ('j', being max integer,
-** is larger or equal to 'i', but it cannot be equal because it is
-** absent while 'i' is present; so 'j > i'.) Otherwise, 'j' is a
-** boundary. ('j + 1' cannot be a present integer key because it is
-** not a valid integer in Lua.)
-*/
+/**
+ ** Try to find a boundary in the hash part of table 't'. From the
+ ** caller, we know that 'j' is zero or present and that 'j + 1' is
+ ** present. We want to find a larger key that is absent from the
+ ** table, so that we can do a binary search between the two keys to
+ ** find a boundary. We keep doubling 'j' until we get an absent index.
+ ** If the doubling would overflow, we try LUA_MAXINTEGER. If it is
+ ** absent, we are ready for the binary search. ('j', being max integer,
+ ** is larger or equal to 'i', but it cannot be equal because it is
+ ** absent while 'i' is present; so 'j > i'.) Otherwise, 'j' is a
+ ** boundary. ('j + 1' cannot be a present integer key because it is
+ ** not a valid integer in Lua.)
+ */
 static lua_Unsigned hash_search (Table *t, lua_Unsigned j) {
   lua_Unsigned i;
   if (j == 0) j++;  /* the caller ensures 'j + 1' is present */
@@ -830,38 +830,38 @@ static unsigned int binsearch (const TValue *array, unsigned int i,
 }
 
 
-/*
-** Try to find a boundary in table 't'. (A 'boundary' is an integer index
-** such that t[i] is present and t[i+1] is absent, or 0 if t[1] is absent
-** and 'maxinteger' if t[maxinteger] is present.)
-** (In the next explanation, we use Lua indices, that is, with base 1.
-** The code itself uses base 0 when indexing the array part of the table.)
-** The code starts with 'limit = t->alimit', a position in the array
-** part that may be a boundary.
-**
-** (1) If 't[limit]' is empty, there must be a boundary before it.
-** As a common case (e.g., after 't[#t]=nil'), check whether 'limit-1'
-** is present. If so, it is a boundary. Otherwise, do a binary search
-** between 0 and limit to find a boundary. In both cases, try to
-** use this boundary as the new 'alimit', as a hint for the next call.
-**
-** (2) If 't[limit]' is not empty and the array has more elements
-** after 'limit', try to find a boundary there. Again, try first
-** the special case (which should be quite frequent) where 'limit+1'
-** is empty, so that 'limit' is a boundary. Otherwise, check the
-** last element of the array part. If it is empty, there must be a
-** boundary between the old limit (present) and the last element
-** (absent), which is found with a binary search. (This boundary always
-** can be a new limit.)
-**
-** (3) The last case is when there are no elements in the array part
-** (limit == 0) or its last element (the new limit) is present.
-** In this case, must check the hash part. If there is no hash part
-** or 'limit+1' is absent, 'limit' is a boundary.  Otherwise, call
-** 'hash_search' to find a boundary in the hash part of the table.
-** (In those cases, the boundary is not inside the array part, and
-** therefore cannot be used as a new limit.)
-*/
+/**
+ ** Try to find a boundary in table 't'. (A 'boundary' is an integer index
+ ** such that t[i] is present and t[i+1] is absent, or 0 if t[1] is absent
+ ** and 'maxinteger' if t[maxinteger] is present.)
+ ** (In the next explanation, we use Lua indices, that is, with base 1.
+ ** The code itself uses base 0 when indexing the array part of the table.)
+ ** The code starts with 'limit = t->alimit', a position in the array
+ ** part that may be a boundary.
+ **
+ ** (1) If 't[limit]' is empty, there must be a boundary before it.
+ ** As a common case (e.g., after 't[#t]=nil'), check whether 'limit-1'
+ ** is present. If so, it is a boundary. Otherwise, do a binary search
+ ** between 0 and limit to find a boundary. In both cases, try to
+ ** use this boundary as the new 'alimit', as a hint for the next call.
+ **
+ ** (2) If 't[limit]' is not empty and the array has more elements
+ ** after 'limit', try to find a boundary there. Again, try first
+ ** the special case (which should be quite frequent) where 'limit+1'
+ ** is empty, so that 'limit' is a boundary. Otherwise, check the
+ ** last element of the array part. If it is empty, there must be a
+ ** boundary between the old limit (present) and the last element
+ ** (absent), which is found with a binary search. (This boundary always
+ ** can be a new limit.)
+ **
+ ** (3) The last case is when there are no elements in the array part
+ ** (limit == 0) or its last element (the new limit) is present.
+ ** In this case, must check the hash part. If there is no hash part
+ ** or 'limit+1' is absent, 'limit' is a boundary.  Otherwise, call
+ ** 'hash_search' to find a boundary in the hash part of the table.
+ ** (In those cases, the boundary is not inside the array part, and
+ ** therefore cannot be used as a new limit.)
+ */
 lua_Unsigned luaH_getn (Table *t) {
   unsigned int limit = t->alimit;
   if (limit > 0 && isempty(&t->array[limit - 1])) {  /* (1)? */
@@ -913,7 +913,7 @@ lua_Unsigned luaH_getn (Table *t) {
 
 #if defined(LUA_DEBUG)
 
-/* export these functions for the test library */
+/** export these functions for the test library */
 
 Node *luaH_mainposition (const Table *t, const TValue *key) {
   return mainpositionTV(t, key);

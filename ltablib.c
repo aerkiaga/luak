@@ -1,8 +1,8 @@
-/*
-** $Id: ltablib.c $
-** Library for Table Manipulation
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: ltablib.c $
+ ** Library for Table Manipulation
+ ** See Copyright Notice in lua.h
+ */
 
 #define ltablib_c
 #define LUA_LIB
@@ -20,10 +20,10 @@
 #include "lualib.h"
 
 
-/*
-** Operations that an object must define to mimic a table
-** (some functions only need some of them)
-*/
+/**
+ ** Operations that an object must define to mimic a table
+ ** (some functions only need some of them)
+ */
 #define TAB_R	1			/* read */
 #define TAB_W	2			/* write */
 #define TAB_L	4			/* length */
@@ -39,10 +39,10 @@ static int checkfield (lua_State *L, const char *key, int n) {
 }
 
 
-/*
-** Check that 'arg' either is a table or can behave like one (that is,
-** has a metatable with the required metamethods)
-*/
+/**
+ ** Check that 'arg' either is a table or can behave like one (that is,
+ ** has a metatable with the required metamethods)
+ */
 static void checktab (lua_State *L, int arg, int what) {
   if (lua_type(L, arg) != LUA_TTABLE) {  /* is it not a table? */
     int n = 1;  /* number of elements to pop */
@@ -105,12 +105,12 @@ static int tremove (lua_State *L) {
 }
 
 
-/*
-** Copy elements (1[f], ..., 1[e]) into (tt[t], tt[t+1], ...). Whenever
-** possible, copy in increasing order, which is better for rehashing.
-** "possible" means destination after original range, or smaller
-** than origin, or copying to another table.
-*/
+/**
+ ** Copy elements (1[f], ..., 1[e]) into (tt[t], tt[t+1], ...). Whenever
+ ** possible, copy in increasing order, which is better for rehashing.
+ ** "possible" means destination after original range, or smaller
+ ** than origin, or copying to another table.
+ */
 static int tmove (lua_State *L) {
   lua_Integer f = luaL_checkinteger(L, 2);
   lua_Integer e = luaL_checkinteger(L, 3);
@@ -171,11 +171,11 @@ static int tconcat (lua_State *L) {
 }
 
 
-/*
-** {======================================================
-** Pack/unpack
-** =======================================================
-*/
+/**
+ ** @{======================================================
+ ** Pack/unpack
+ ** =======================================================
+ */
 
 static int tpack (lua_State *L) {
   int i;
@@ -205,42 +205,42 @@ static int tunpack (lua_State *L) {
   return (int)n;
 }
 
-/* }====================================================== */
+/** @}====================================================== */
 
 
 
-/*
-** {======================================================
-** Quicksort
-** (based on 'Algorithms in MODULA-3', Robert Sedgewick;
-**  Addison-Wesley, 1993.)
-** =======================================================
-*/
+/**
+ ** @{======================================================
+ ** Quicksort
+ ** (based on 'Algorithms in MODULA-3', Robert Sedgewick;
+ **  Addison-Wesley, 1993.)
+ ** =======================================================
+ */
 
 
-/* type for array indices */
+/** type for array indices */
 typedef unsigned int IdxT;
 
 
-/*
-** Produce a "random" 'unsigned int' to randomize pivot choice. This
-** macro is used only when 'sort' detects a big imbalance in the result
-** of a partition. (If you don't want/need this "randomness", ~0 is a
-** good choice.)
-*/
+/**
+ ** Produce a "random" 'unsigned int' to randomize pivot choice. This
+ ** macro is used only when 'sort' detects a big imbalance in the result
+ ** of a partition. (If you don't want/need this "randomness", ~0 is a
+ ** good choice.)
+ */
 #if !defined(l_randomizePivot)		/* { */
 
 #include <time.h>
 
-/* size of 'e' measured in number of 'unsigned int's */
+/** size of 'e' measured in number of 'unsigned int's */
 #define sof(e)		(sizeof(e) / sizeof(unsigned int))
 
-/*
-** Use 'time' and 'clock' as sources of "randomness". Because we don't
-** know the types 'clock_t' and 'time_t', we cannot cast them to
-** anything without risking overflows. A safe way to use their values
-** is to copy them to an array of a known type and use the array values.
-*/
+/**
+ ** Use 'time' and 'clock' as sources of "randomness". Because we don't
+ ** know the types 'clock_t' and 'time_t', we cannot cast them to
+ ** anything without risking overflows. A safe way to use their values
+ ** is to copy them to an array of a known type and use the array values.
+ */
 static unsigned int l_randomizePivot (void) {
   clock_t c = clock();
   time_t t = time(NULL);
@@ -256,7 +256,7 @@ static unsigned int l_randomizePivot (void) {
 #endif					/* } */
 
 
-/* arrays larger than 'RANLIMIT' may use randomized pivots */
+/** arrays larger than 'RANLIMIT' may use randomized pivots */
 #define RANLIMIT	100u
 
 
@@ -266,10 +266,10 @@ static void set2 (lua_State *L, IdxT i, IdxT j) {
 }
 
 
-/*
-** Return true iff value at stack index 'a' is less than the value at
-** index 'b' (according to the order of the sort).
-*/
+/**
+ ** Return true iff value at stack index 'a' is less than the value at
+ ** index 'b' (according to the order of the sort).
+ */
 static int sort_comp (lua_State *L, int a, int b) {
   if (lua_isnil(L, 2))  /* no function? */
     return lua_compare(L, a, b, LUA_OPLT);  /* a < b */
@@ -286,13 +286,13 @@ static int sort_comp (lua_State *L, int a, int b) {
 }
 
 
-/*
-** Does the partition: Pivot P is at the top of the stack.
-** precondition: a[lo] <= P == a[up-1] <= a[up],
-** so it only needs to do the partition from lo + 1 to up - 2.
-** Pos-condition: a[lo .. i - 1] <= a[i] == P <= a[i + 1 .. up]
-** returns 'i'.
-*/
+/**
+ ** Does the partition: Pivot P is at the top of the stack.
+ ** precondition: a[lo] <= P == a[up-1] <= a[up],
+ ** so it only needs to do the partition from lo + 1 to up - 2.
+ ** Pos-condition: a[lo .. i - 1] <= a[i] == P <= a[i + 1 .. up]
+ ** returns 'i'.
+ */
 static IdxT partition (lua_State *L, IdxT lo, IdxT up) {
   IdxT i = lo;  /* will be incremented before first use */
   IdxT j = up - 1;  /* will be decremented before first use */
@@ -325,10 +325,10 @@ static IdxT partition (lua_State *L, IdxT lo, IdxT up) {
 }
 
 
-/*
-** Choose an element in the middle (2nd-3th quarters) of [lo,up]
-** "randomized" by 'rnd'
-*/
+/**
+ ** Choose an element in the middle (2nd-3th quarters) of [lo,up]
+ ** "randomized" by 'rnd'
+ */
 static IdxT choosePivot (IdxT lo, IdxT up, unsigned int rnd) {
   IdxT r4 = (up - lo) / 4;  /* range/4 */
   IdxT p = rnd % (r4 * 2) + (lo + r4);
@@ -337,9 +337,9 @@ static IdxT choosePivot (IdxT lo, IdxT up, unsigned int rnd) {
 }
 
 
-/*
-** Quicksort algorithm (recursive function)
-*/
+/**
+ ** Quicksort algorithm (recursive function)
+ */
 static void auxsort (lua_State *L, IdxT lo, IdxT up,
                                    unsigned int rnd) {
   while (lo < up) {  /* loop for tail recursion */
@@ -406,7 +406,7 @@ static int sort (lua_State *L) {
   return 0;
 }
 
-/* }====================================================== */
+/** @}====================================================== */
 
 
 static const luaL_Reg tab_funcs[] = {

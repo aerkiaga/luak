@@ -1,8 +1,8 @@
-/*
-** $Id: llex.c $
-** Lexical Analyzer
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: llex.c $
+ ** Lexical Analyzer
+ ** See Copyright Notice in lua.h
+ */
 
 #define llex_c
 #define LUA_CORE
@@ -36,7 +36,7 @@
 #define currIsNewline(ls)	(ls->current == '\n' || ls->current == '\r')
 
 
-/* ORDER RESERVED */
+/** ORDER RESERVED */
 static const char *const luaX_tokens [] = {
     "and", "break", "do", "else", "elseif",
     "end", "false", "for", "function", "goto", "if",
@@ -122,11 +122,11 @@ l_noret luaX_syntaxerror (LexState *ls, const char *msg) {
 }
 
 
-/*
-** creates a new string and anchors it in scanner's table so that
-** it will not be collected until the end of the compilation
-** (by that time it should be anchored somewhere)
-*/
+/**
+ ** creates a new string and anchors it in scanner's table so that
+ ** it will not be collected until the end of the compilation
+ ** (by that time it should be anchored somewhere)
+ */
 TString *luaX_newstring (LexState *ls, const char *str, size_t l) {
   lua_State *L = ls->L;
   TValue *o;  /* entry for 'str' */
@@ -147,10 +147,10 @@ TString *luaX_newstring (LexState *ls, const char *str, size_t l) {
 }
 
 
-/*
-** increment line number and skips newline sequence (any of
-** \n, \r, \n\r, or \r\n)
-*/
+/**
+ ** increment line number and skips newline sequence (any of
+ ** \n, \r, \n\r, or \r\n)
+ */
 static void inclinenumber (LexState *ls) {
   int old = ls->current;
   lua_assert(currIsNewline(ls));
@@ -179,11 +179,11 @@ void luaX_setinput (lua_State *L, LexState *ls, ZIO *z, TString *source,
 
 
 
-/*
-** =======================================================
-** LEXICAL ANALYZER
-** =======================================================
-*/
+/**
+ ** =======================================================
+ ** LEXICAL ANALYZER
+ ** =======================================================
+ */
 
 
 static int check_next1 (LexState *ls, int c) {
@@ -195,10 +195,10 @@ static int check_next1 (LexState *ls, int c) {
 }
 
 
-/*
-** Check whether current char is in set 'set' (with two chars) and
-** saves it
-*/
+/**
+ ** Check whether current char is in set 'set' (with two chars) and
+ ** saves it
+ */
 static int check_next2 (LexState *ls, const char *set) {
   lua_assert(set[2] == '\0');
   if (ls->current == set[0] || ls->current == set[1]) {
@@ -209,19 +209,19 @@ static int check_next2 (LexState *ls, const char *set) {
 }
 
 
-/* LUA_NUMBER */
-/*
-** This function is quite liberal in what it accepts, as 'luaO_str2num'
-** will reject ill-formed numerals. Roughly, it accepts the following
-** pattern:
-**
-**   %d(%x|%.|([Ee][+-]?))* | 0[Xx](%x|%.|([Pp][+-]?))*
-**
-** The only tricky part is to accept [+-] only after a valid exponent
-** mark, to avoid reading '3-4' or '0xe+1' as a single number.
-**
-** The caller might have already read an initial dot.
-*/
+/** LUA_NUMBER */
+/**
+ ** This function is quite liberal in what it accepts, as 'luaO_str2num'
+ ** will reject ill-formed numerals. Roughly, it accepts the following
+ ** pattern:
+ **
+ **   %d(%x|%.|([Ee][+-]?))* | 0[Xx](%x|%.|([Pp][+-]?))*
+ **
+ ** The only tricky part is to accept [+-] only after a valid exponent
+ ** mark, to avoid reading '3-4' or '0xe+1' as a single number.
+ **
+ ** The caller might have already read an initial dot.
+ */
 static int read_numeral (LexState *ls, SemInfo *seminfo) {
   TValue obj;
   const char *expo = "Ee";
@@ -254,11 +254,11 @@ static int read_numeral (LexState *ls, SemInfo *seminfo) {
 }
 
 
-/*
-** reads a sequence '[=*[' or ']=*]', leaving the last bracket.
-** If sequence is well formed, return its number of '='s + 2; otherwise,
-** return 1 if there is no '='s or 0 otherwise (an unfinished '[==...').
-*/
+/**
+ ** reads a sequence '[=*[' or ']=*]', leaving the last bracket.
+ ** If sequence is well formed, return its number of '='s + 2; otherwise,
+ ** return 1 if there is no '='s or 0 otherwise (an unfinished '[==...').
+ */
 static size_t skip_sep (LexState *ls) {
   size_t count = 0;
   int s = ls->current;

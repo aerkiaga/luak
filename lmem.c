@@ -1,8 +1,8 @@
-/*
-** $Id: lmem.c $
-** Interface to Memory Manager
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: lmem.c $
+ ** Interface to Memory Manager
+ ** See Copyright Notice in lua.h
+ */
 
 #define lmem_c
 #define LUA_CORE
@@ -23,11 +23,11 @@
 
 
 #if defined(HARDMEMTESTS)
-/*
-** First allocation will fail whenever not building initial state
-** and not shrinking a block. (This fail will trigger 'tryagain' and
-** a full GC cycle at every allocation.)
-*/
+/**
+ ** First allocation will fail whenever not building initial state
+ ** and not shrinking a block. (This fail will trigger 'tryagain' and
+ ** a full GC cycle at every allocation.)
+ */
 static void *firsttry (global_State *g, void *block, size_t os, size_t ns) {
   if (ttisnil(&g->nilvalue) && ns > os)
     return NULL;  /* fail */
@@ -42,37 +42,37 @@ static void *firsttry (global_State *g, void *block, size_t os, size_t ns) {
 
 
 
-/*
-** About the realloc function:
-** void *frealloc (void *ud, void *ptr, size_t osize, size_t nsize);
-** ('osize' is the old size, 'nsize' is the new size)
-**
-** - frealloc(ud, p, x, 0) frees the block 'p' and returns NULL.
-** Particularly, frealloc(ud, NULL, 0, 0) does nothing,
-** which is equivalent to free(NULL) in ISO C.
-**
-** - frealloc(ud, NULL, x, s) creates a new block of size 's'
-** (no matter 'x'). Returns NULL if it cannot create the new block.
-**
-** - otherwise, frealloc(ud, b, x, y) reallocates the block 'b' from
-** size 'x' to size 'y'. Returns NULL if it cannot reallocate the
-** block to the new size.
-*/
+/**
+ ** About the realloc function:
+ ** void *frealloc (void *ud, void *ptr, size_t osize, size_t nsize);
+ ** ('osize' is the old size, 'nsize' is the new size)
+ **
+ ** - frealloc(ud, p, x, 0) frees the block 'p' and returns NULL.
+ ** Particularly, frealloc(ud, NULL, 0, 0) does nothing,
+ ** which is equivalent to free(NULL) in ISO C.
+ **
+ ** - frealloc(ud, NULL, x, s) creates a new block of size 's'
+ ** (no matter 'x'). Returns NULL if it cannot create the new block.
+ **
+ ** - otherwise, frealloc(ud, b, x, y) reallocates the block 'b' from
+ ** size 'x' to size 'y'. Returns NULL if it cannot reallocate the
+ ** block to the new size.
+ */
 
 
 
 
-/*
-** {==================================================================
-** Functions to allocate/deallocate arrays for the Parser
-** ===================================================================
-*/
+/**
+ ** @{==================================================================
+ ** Functions to allocate/deallocate arrays for the Parser
+ ** ===================================================================
+ */
 
-/*
-** Minimum size for arrays during parsing, to avoid overhead of
-** reallocating to size 1, then 2, and then 4. All these arrays
-** will be reallocated to exact sizes or erased when parsing ends.
-*/
+/**
+ ** Minimum size for arrays during parsing, to avoid overhead of
+ ** reallocating to size 1, then 2, and then 4. All these arrays
+ ** will be reallocated to exact sizes or erased when parsing ends.
+ */
 #define MINSIZEARRAY	4
 
 
@@ -101,12 +101,12 @@ void *luaM_growaux_ (lua_State *L, void *block, int nelems, int *psize,
 }
 
 
-/*
-** In prototypes, the size of the array is also its number of
-** elements (to save memory). So, if it cannot shrink an array
-** to its number of elements, the only option is to raise an
-** error.
-*/
+/**
+ ** In prototypes, the size of the array is also its number of
+ ** elements (to save memory). So, if it cannot shrink an array
+ ** to its number of elements, the only option is to raise an
+ ** error.
+ */
 void *luaM_shrinkvector_ (lua_State *L, void *block, int *size,
                           int final_n, int size_elem) {
   void *newblock;
@@ -118,7 +118,7 @@ void *luaM_shrinkvector_ (lua_State *L, void *block, int *size,
   return newblock;
 }
 
-/* }================================================================== */
+/** @}================================================================== */
 
 
 l_noret luaM_toobig (lua_State *L) {
@@ -126,9 +126,9 @@ l_noret luaM_toobig (lua_State *L) {
 }
 
 
-/*
-** Free memory
-*/
+/**
+ ** Free memory
+ */
 void luaM_free_ (lua_State *L, void *block, size_t osize) {
   global_State *g = G(L);
   lua_assert((osize == 0) == (block == NULL));
@@ -137,12 +137,12 @@ void luaM_free_ (lua_State *L, void *block, size_t osize) {
 }
 
 
-/*
-** In case of allocation fail, this function will call the GC to try
-** to free some memory and then try the allocation again.
-** (It should not be called when shrinking a block, because then the
-** interpreter may be in the middle of a collection step.)
-*/
+/**
+ ** In case of allocation fail, this function will call the GC to try
+ ** to free some memory and then try the allocation again.
+ ** (It should not be called when shrinking a block, because then the
+ ** interpreter may be in the middle of a collection step.)
+ */
 static void *tryagain (lua_State *L, void *block,
                        size_t osize, size_t nsize) {
   global_State *g = G(L);
@@ -154,11 +154,11 @@ static void *tryagain (lua_State *L, void *block,
 }
 
 
-/*
-** Generic allocation routine.
-** If allocation fails while shrinking a block, do not try again; the
-** GC shrinks some blocks and it is not reentrant.
-*/
+/**
+ ** Generic allocation routine.
+ ** If allocation fails while shrinking a block, do not try again; the
+ ** GC shrinks some blocks and it is not reentrant.
+ */
 void *luaM_realloc_ (lua_State *L, void *block, size_t osize, size_t nsize) {
   void *newblock;
   global_State *g = G(L);

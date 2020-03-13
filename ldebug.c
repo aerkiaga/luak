@@ -1,8 +1,8 @@
-/*
-** $Id: ldebug.c $
-** Debug Interface
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: ldebug.c $
+ ** Debug Interface
+ ** See Copyright Notice in lua.h
+ */
 
 #define ldebug_c
 #define LUA_CORE
@@ -34,7 +34,7 @@
 #define noLuaClosure(f)		((f) == NULL || (f)->c.tt == LUA_VCCL)
 
 
-/* Active Lua function (given call info) */
+/** Active Lua function (given call info) */
 #define ci_func(ci)		(clLvalue(s2v((ci)->func)))
 
 
@@ -48,13 +48,13 @@ static int currentpc (CallInfo *ci) {
 }
 
 
-/*
-** Get a "base line" to find the line corresponding to an instruction.
-** For that, search the array of absolute line info for the largest saved
-** instruction smaller or equal to the wanted instruction. A special
-** case is when there is no absolute info or the instruction is before
-** the first absolute one.
-*/
+/**
+ ** Get a "base line" to find the line corresponding to an instruction.
+ ** For that, search the array of absolute line info for the largest saved
+ ** instruction smaller or equal to the wanted instruction. A special
+ ** case is when there is no absolute info or the instruction is before
+ ** the first absolute one.
+ */
 static int getbaseline (const Proto *f, int pc, int *basepc) {
   if (f->sizeabslineinfo == 0 || pc < f->abslineinfo[0].pc) {
     *basepc = -1;  /* start from the beginning */
@@ -81,11 +81,11 @@ static int getbaseline (const Proto *f, int pc, int *basepc) {
 }
 
 
-/*
-** Get the line corresponding to instruction 'pc' in function 'f';
-** first gets a base line and from there does the increments until
-** the desired instruction.
-*/
+/**
+ ** Get the line corresponding to instruction 'pc' in function 'f';
+ ** first gets a base line and from there does the increments until
+ ** the desired instruction.
+ */
 int luaG_getfuncline (const Proto *f, int pc) {
   if (f->lineinfo == NULL)  /* no debug information? */
     return -1;
@@ -106,15 +106,15 @@ static int getcurrentline (CallInfo *ci) {
 }
 
 
-/*
-** This function can be called asynchronously (e.g. during a signal),
-** under "reasonable" assumptions. A new 'ci' is completely linked
-** in the list before it becomes part of the "active" list, and
-** we assume that pointers are atomic (see comment in next function).
-** (If we traverse one more item, there is no problem. If we traverse
-** one less item, the worst that can happen is that the signal will
-** not interrupt the script.)
-*/
+/**
+ ** This function can be called asynchronously (e.g. during a signal),
+ ** under "reasonable" assumptions. A new 'ci' is completely linked
+ ** in the list before it becomes part of the "active" list, and
+ ** we assume that pointers are atomic (see comment in next function).
+ ** (If we traverse one more item, there is no problem. If we traverse
+ ** one less item, the worst that can happen is that the signal will
+ ** not interrupt the script.)
+ */
 static void settraps (CallInfo *ci) {
   for (; ci != NULL; ci = ci->previous)
     if (isLua(ci))
@@ -122,16 +122,16 @@ static void settraps (CallInfo *ci) {
 }
 
 
-/*
-** This function can be called asynchronously (e.g. during a signal),
-** under "reasonable" assumptions.
-** Fields 'oldpc', 'basehookcount', and 'hookcount' (set by
-** 'resethookcount') are for debug only, and it is no problem if they
-** get arbitrary values (causes at most one wrong hook call). 'hookmask'
-** is an atomic value. We assume that pointers are atomic too (e.g., gcc
-** ensures that for all platforms where it runs). Moreover, 'hook' is
-** always checked before being called (see 'luaD_hook').
-*/
+/**
+ ** This function can be called asynchronously (e.g. during a signal),
+ ** under "reasonable" assumptions.
+ ** Fields 'oldpc', 'basehookcount', and 'hookcount' (set by
+ ** 'resethookcount') are for debug only, and it is no problem if they
+ ** get arbitrary values (causes at most one wrong hook call). 'hookmask'
+ ** is an atomic value. We assume that pointers are atomic too (e.g., gcc
+ ** ensures that for all platforms where it runs). Moreover, 'hook' is
+ ** always checked before being called (see 'luaD_hook').
+ */
 LUA_API void lua_sethook (lua_State *L, lua_Hook func, int mask, int count) {
   if (func == NULL || mask == 0) {  /* turn off hooks? */
     mask = 0;
@@ -416,28 +416,28 @@ LUA_API int lua_getinfo (lua_State *L, const char *what, lua_Debug *ar) {
 }
 
 
-/*
-** {======================================================
-** Symbolic Execution
-** =======================================================
-*/
+/**
+ ** @{======================================================
+ ** Symbolic Execution
+ ** =======================================================
+ */
 
 static const char *getobjname (const Proto *p, int lastpc, int reg,
                                const char **name);
 
 
-/*
-** Find a "name" for the constant 'c'.
-*/
+/**
+ ** Find a "name" for the constant 'c'.
+ */
 static void kname (const Proto *p, int c, const char **name) {
   TValue *kvalue = &p->k[c];
   *name = (ttisstring(kvalue)) ? svalue(kvalue) : "?";
 }
 
 
-/*
-** Find a "name" for the register 'c'.
-*/
+/**
+ ** Find a "name" for the register 'c'.
+ */
 static void rname (const Proto *p, int pc, int c, const char **name) {
   const char *what = getobjname(p, pc, c, name); /* search for 'c' */
   if (!(what && *what == 'c'))  /* did not find a constant name? */
@@ -445,9 +445,9 @@ static void rname (const Proto *p, int pc, int c, const char **name) {
 }
 
 
-/*
-** Find a "name" for a 'C' value in an RK instruction.
-*/
+/**
+ ** Find a "name" for a 'C' value in an RK instruction.
+ */
 static void rkname (const Proto *p, int pc, Instruction i, const char **name) {
   int c = GETARG_C(i);  /* key index */
   if (GETARG_k(i))  /* is 'c' a constant? */
@@ -464,9 +464,9 @@ static int filterpc (int pc, int jmptarget) {
 }
 
 
-/*
-** Try to find last instruction before 'lastpc' that modified register 'reg'.
-*/
+/**
+ ** Try to find last instruction before 'lastpc' that modified register 'reg'.
+ */
 static int findsetreg (const Proto *p, int lastpc, int reg) {
   int pc;
   int setreg = -1;  /* keep last instruction that changed 'reg' */
@@ -513,10 +513,10 @@ static int findsetreg (const Proto *p, int lastpc, int reg) {
 }
 
 
-/*
-** Check whether table being indexed by instruction 'i' is the
-** environment '_ENV'
-*/
+/**
+ ** Check whether table being indexed by instruction 'i' is the
+ ** environment '_ENV'
+ */
 static const char *gxf (const Proto *p, int pc, Instruction i, int isup) {
   int t = GETARG_B(i);  /* table index */
   const char *name;  /* name of indexed variable */
@@ -590,12 +590,12 @@ static const char *getobjname (const Proto *p, int lastpc, int reg,
 }
 
 
-/*
-** Try to find a name for a function based on the code that called it.
-** (Only works when function was called by a Lua function.)
-** Returns what the name is (e.g., "for iterator", "method",
-** "metamethod") and sets '*name' to point to the name.
-*/
+/**
+ ** Try to find a name for a function based on the code that called it.
+ ** (Only works when function was called by a Lua function.)
+ ** Returns what the name is (e.g., "for iterator", "method",
+ ** "metamethod") and sets '*name' to point to the name.
+ */
 static const char *funcnamefromcode (lua_State *L, CallInfo *ci,
                                      const char **name) {
   TMS tm = (TMS)0;  /* (initial value avoids warnings) */
@@ -644,15 +644,15 @@ static const char *funcnamefromcode (lua_State *L, CallInfo *ci,
   return "metamethod";
 }
 
-/* }====================================================== */
+/** @}====================================================== */
 
 
 
-/*
-** The subtraction of two potentially unrelated pointers is
-** not ISO C, but it should not crash a program; the subsequent
-** checks are ISO C and ensure a correct result.
-*/
+/**
+ ** The subtraction of two potentially unrelated pointers is
+ ** not ISO C, but it should not crash a program; the subsequent
+ ** checks are ISO C and ensure a correct result.
+ */
 static int isinstack (CallInfo *ci, const TValue *o) {
   StkId base = ci->func + 1;
   ptrdiff_t i = cast(StkId, o) - base;
@@ -660,11 +660,11 @@ static int isinstack (CallInfo *ci, const TValue *o) {
 }
 
 
-/*
-** Checks whether value 'o' came from an upvalue. (That can only happen
-** with instructions OP_GETTABUP/OP_SETTABUP, which operate directly on
-** upvalues.)
-*/
+/**
+ ** Checks whether value 'o' came from an upvalue. (That can only happen
+ ** with instructions OP_GETTABUP/OP_SETTABUP, which operate directly on
+ ** upvalues.)
+ */
 static const char *getupvalname (CallInfo *ci, const TValue *o,
                                  const char **name) {
   LClosure *c = ci_func(ci);
@@ -719,9 +719,9 @@ l_noret luaG_opinterror (lua_State *L, const TValue *p1,
 }
 
 
-/*
-** Error when both values are convertible to numbers, but not to integers
-*/
+/**
+ ** Error when both values are convertible to numbers, but not to integers
+ */
 l_noret luaG_tointerror (lua_State *L, const TValue *p1, const TValue *p2) {
   lua_Integer temp;
   if (!tointegerns(p1, &temp))
@@ -740,7 +740,7 @@ l_noret luaG_ordererror (lua_State *L, const TValue *p1, const TValue *p2) {
 }
 
 
-/* add src:line information to 'msg' */
+/** add src:line information to 'msg' */
 const char *luaG_addinfo (lua_State *L, const char *msg, TString *src,
                                         int line) {
   char buff[LUA_IDSIZE];
@@ -780,10 +780,10 @@ l_noret luaG_runerror (lua_State *L, const char *fmt, ...) {
 }
 
 
-/*
-** Check whether new instruction 'newpc' is in a different line from
-** previous instruction 'oldpc'.
-*/
+/**
+ ** Check whether new instruction 'newpc' is in a different line from
+ ** previous instruction 'oldpc'.
+ */
 static int changedline (const Proto *p, int oldpc, int newpc) {
   while (oldpc++ < newpc) {
     if (p->lineinfo[oldpc] != 0)

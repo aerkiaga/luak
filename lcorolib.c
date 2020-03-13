@@ -1,8 +1,8 @@
-/*
-** $Id: lcorolib.c $
-** Coroutine Library
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: lcorolib.c $
+ ** Coroutine Library
+ ** See Copyright Notice in lua.h
+ */
 
 #define lcorolib_c
 #define LUA_LIB
@@ -25,10 +25,10 @@ static lua_State *getco (lua_State *L) {
 }
 
 
-/*
-** Resumes a coroutine. Returns the number of results for non-error
-** cases or -1 for errors.
-*/
+/**
+ ** Resumes a coroutine. Returns the number of results for non-error
+ ** cases or -1 for errors.
+ */
 static int auxresume (lua_State *L, lua_State *co, int narg) {
   int status, nres;
   if (!lua_checkstack(co, narg)) {

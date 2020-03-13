@@ -1,8 +1,8 @@
-/*
-** $Id: ltable.h $
-** Lua tables (hash)
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: ltable.h $
+ ** Lua tables (hash)
+ ** See Copyright Notice in lua.h
+ */
 
 #ifndef ltable_h
 #define ltable_h
@@ -18,15 +18,15 @@
 #define invalidateTMcache(t)	((t)->flags = 0)
 
 
-/* true when 't' is using 'dummynode' as its hash part */
+/** true when 't' is using 'dummynode' as its hash part */
 #define isdummy(t)		((t)->lastfree == NULL)
 
 
-/* allocated size for hash nodes */
+/** allocated size for hash nodes */
 #define allocsizenode(t)	(isdummy(t) ? 0 : sizenode(t))
 
 
-/* returns the Node, given the value of a table entry */
+/** returns the Node, given the value of a table entry */
 #define nodefromval(v) 	cast(Node *, (v))
 
 

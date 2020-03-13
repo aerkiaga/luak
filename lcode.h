@@ -1,8 +1,8 @@
-/*
-** $Id: lcode.h $
-** Code generator for Lua
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: lcode.h $
+ ** Code generator for Lua
+ ** See Copyright Notice in lua.h
+ */
 
 #ifndef lcode_h
 #define lcode_h
@@ -13,16 +13,16 @@
 #include "lparser.h"
 
 
-/*
-** Marks the end of a patch list. It is an invalid value both as an absolute
-** address, and as a list link (would link an element to itself).
-*/
+/**
+ ** Marks the end of a patch list. It is an invalid value both as an absolute
+ ** address, and as a list link (would link an element to itself).
+ */
 #define NO_JUMP (-1)
 
 
-/*
-** grep "ORDER OPR" if you change these enums  (ORDER OP)
-*/
+/**
+ ** grep "ORDER OPR" if you change these enums  (ORDER OP)
+ */
 typedef enum BinOpr {
   /* arithmetic operators */
   OPR_ADD, OPR_SUB, OPR_MUL, OPR_MOD, OPR_POW,
@@ -41,7 +41,7 @@ typedef enum BinOpr {
 } BinOpr;
 
 
-/* true if operation is foldable (that is, it is arithmetic or bitwise) */
+/** true if operation is foldable (that is, it is arithmetic or bitwise) */
 #define foldbinop(op)	((op) <= OPR_SHR)
 
 
@@ -51,7 +51,7 @@ typedef enum BinOpr {
 typedef enum UnOpr { OPR_MINUS, OPR_BNOT, OPR_NOT, OPR_LEN, OPR_NOUNOPR } UnOpr;
 
 
-/* get (pointer to) instruction of given 'expdesc' */
+/** get (pointer to) instruction of given 'expdesc' */
 #define getinstruction(fs,e)	((fs)->f->code[(e)->u.info])
 
 

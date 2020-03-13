@@ -1,8 +1,8 @@
-/*
-** $Id: lutf8lib.c $
-** Standard library for UTF-8 manipulation
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: lutf8lib.c $
+ ** Standard library for UTF-8 manipulation
+ ** See Copyright Notice in lua.h
+ */
 
 #define lutf8lib_c
 #define LUA_LIB
@@ -25,9 +25,9 @@
 
 #define MAXUTF		0x7FFFFFFFu
 
-/*
-** Integer type for decoded UTF-8 values; MAXUTF needs 31 bits.
-*/
+/**
+ ** Integer type for decoded UTF-8 values; MAXUTF needs 31 bits.
+ */
 #if (UINT_MAX >> 30) >= 1
 typedef	unsigned int utfint;
 #else
@@ -38,8 +38,8 @@ typedef unsigned long utfint;
 #define iscont(p)	((*(p) & 0xC0) == 0x80)
 
 
-/* from strlib */
-/* translate a relative string position: negative means back from end */
+/** from strlib */
+/** translate a relative string position: negative means back from end */
 static lua_Integer u_posrelat (lua_Integer pos, size_t len) {
   if (pos >= 0) return pos;
   else if (0u - (size_t)pos > len) return 0;
@@ -47,13 +47,13 @@ static lua_Integer u_posrelat (lua_Integer pos, size_t len) {
 }
 
 
-/*
-** Decode one UTF-8 sequence, returning NULL if byte sequence is
-** invalid.  The array 'limits' stores the minimum value for each
-** sequence length, to check for overlong representations. Its first
-** entry forces an error for non-ascii bytes with no continuation
-** bytes (count == 0).
-*/
+/**
+ ** Decode one UTF-8 sequence, returning NULL if byte sequence is
+ ** invalid.  The array 'limits' stores the minimum value for each
+ ** sequence length, to check for overlong representations. Its first
+ ** entry forces an error for non-ascii bytes with no continuation
+ ** bytes (count == 0).
+ */
 static const char *utf8_decode (const char *s, utfint *val, int strict) {
   static const utfint limits[] =
         {~(utfint)0, 0x80, 0x800, 0x10000u, 0x200000u, 0x4000000u};
@@ -84,11 +84,11 @@ static const char *utf8_decode (const char *s, utfint *val, int strict) {
 }
 
 
-/*
-** utf8len(s [, i [, j [, lax]]]) --> number of characters that
-** start in the range [i,j], or nil + current position if 's' is not
-** well formed in that interval
-*/
+/**
+ ** utf8len(s [, i [, j [, lax]]]) --> number of characters that
+ ** start in the range [i,j], or nil + current position if 's' is not
+ ** well formed in that interval
+ */
 static int utflen (lua_State *L) {
   lua_Integer n = 0;  /* counter for the number of characters */
   size_t len;  /* string length in bytes */
@@ -115,10 +115,10 @@ static int utflen (lua_State *L) {
 }
 
 
-/*
-** codepoint(s, [i, [j [, lax]]]) -> returns codepoints for all
-** characters that start in the range [i,j]
-*/
+/**
+ ** codepoint(s, [i, [j [, lax]]]) -> returns codepoints for all
+ ** characters that start in the range [i,j]
+ */
 static int codepoint (lua_State *L) {
   size_t len;
   const char *s = luaL_checklstring(L, 1, &len);
@@ -155,9 +155,9 @@ static void pushutfchar (lua_State *L, int arg) {
 }
 
 
-/*
-** utfchar(n1, n2, ...)  -> char(n1)..char(n2)...
-*/
+/**
+ ** utfchar(n1, n2, ...)  -> char(n1)..char(n2)...
+ */
 static int utfchar (lua_State *L) {
   int n = lua_gettop(L);  /* number of arguments */
   if (n == 1)  /* optimize common case of single char */
@@ -176,10 +176,10 @@ static int utfchar (lua_State *L) {
 }
 
 
-/*
-** offset(s, n, [i])  -> index where n-th character counting from
-**   position 'i' starts; 0 means character at 'i'.
-*/
+/**
+ ** offset(s, n, [i])  -> index where n-th character counting from
+ **   position 'i' starts; 0 means character at 'i'.
+ */
 static int byteoffset (lua_State *L) {
   size_t len;
   const char *s = luaL_checklstring(L, 1, &len);
@@ -264,7 +264,7 @@ static int iter_codes (lua_State *L) {
 }
 
 
-/* pattern to match a single UTF-8 character */
+/** pattern to match a single UTF-8 character */
 #define UTF8PATT	"[\0-\x7F\xC2-\xFD][\x80-\xBF]*"
 
 

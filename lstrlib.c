@@ -1,8 +1,8 @@
-/*
-** $Id: lstrlib.c $
-** Standard library for string operations and pattern-matching
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: lstrlib.c $
+ ** Standard library for string operations and pattern-matching
+ ** See Copyright Notice in lua.h
+ */
 
 #define lstrlib_c
 #define LUA_LIB
@@ -26,24 +26,24 @@
 #include "lualib.h"
 
 
-/*
-** maximum number of captures that a pattern can do during
-** pattern-matching. This limit is arbitrary, but must fit in
-** an unsigned char.
-*/
+/**
+ ** maximum number of captures that a pattern can do during
+ ** pattern-matching. This limit is arbitrary, but must fit in
+ ** an unsigned char.
+ */
 #if !defined(LUA_MAXCAPTURES)
 #define LUA_MAXCAPTURES		32
 #endif
 
 
-/* macro to 'unsign' a character */
+/** macro to 'unsign' a character */
 #define uchar(c)	((unsigned char)(c))
 
 
-/*
-** Some sizes are better limited to fit in 'int', but must also fit in
-** 'size_t'. (We assume that 'lua_Integer' cannot be smaller than 'int'.)
-*/
+/**
+ ** Some sizes are better limited to fit in 'int', but must also fit in
+ ** 'size_t'. (We assume that 'lua_Integer' cannot be smaller than 'int'.)
+ */
 #define MAX_SIZET	((size_t)(~(size_t)0))
 
 #define MAXSIZE  \
@@ -60,14 +60,14 @@ static int str_len (lua_State *L) {
 }
 
 
-/*
-** translate a relative initial string position
-** (negative means back from end): clip result to [1, inf).
-** The length of any string in Lua must fit in a lua_Integer,
-** so there are no overflows in the casts.
-** The inverted comparison avoids a possible overflow
-** computing '-pos'.
-*/
+/**
+ ** translate a relative initial string position
+ ** (negative means back from end): clip result to [1, inf).
+ ** The length of any string in Lua must fit in a lua_Integer,
+ ** so there are no overflows in the casts.
+ ** The inverted comparison avoids a possible overflow
+ ** computing '-pos'.
+ */
 static size_t posrelatI (lua_Integer pos, size_t len) {
   if (pos > 0)
     return (size_t)pos;
@@ -79,11 +79,11 @@ static size_t posrelatI (lua_Integer pos, size_t len) {
 }
 
 
-/*
-** Gets an optional ending string position from argument 'arg',
-** with default value 'def'.
-** Negative means back from end: clip result to [0, len]
-*/
+/**
+ ** Gets an optional ending string position from argument 'arg',
+ ** with default value 'def'.
+ ** Negative means back from end: clip result to [0, len]
+ */
 static size_t getendpos (lua_State *L, int arg, lua_Integer def,
                          size_t len) {
   lua_Integer pos = luaL_optinteger(L, arg, def);
@@ -206,12 +206,12 @@ static int str_char (lua_State *L) {
 }
 
 
-/*
-** Buffer to store the result of 'string.dump'. It must be initialized
-** after the call to 'lua_dump', to ensure that the function is on the
-** top of the stack when 'lua_dump' is called. ('luaL_buffinit' might
-** push stuff.)
-*/
+/**
+ ** Buffer to store the result of 'string.dump'. It must be initialized
+ ** after the call to 'lua_dump', to ensure that the function is on the
+ ** top of the stack when 'lua_dump' is called. ('luaL_buffinit' might
+ ** push stuff.)
+ */
 struct str_Writer {
   int init;  /* true iff buffer has been initialized */
   luaL_Buffer B;
@@ -243,15 +243,15 @@ static int str_dump (lua_State *L) {
 
 
 
-/*
-** {======================================================
-** METAMETHODS
-** =======================================================
-*/
+/**
+ ** @$1======================================================
+ ** METAMETHODS
+ ** =======================================================
+ */
 
 #if defined(LUA_NOCVTS2N)	/* { */
 
-/* no coercion from strings to numbers */
+/** no coercion from strings to numbers */
 
 static const luaL_Reg stringmetamethods[] = {
   {"__index", NULL},  /* placeholder */
@@ -340,13 +340,13 @@ static const luaL_Reg stringmetamethods[] = {
 
 #endif		/* } */
 
-/* }====================================================== */
+/** @$1====================================================== */
 
-/*
-** {======================================================
-** PATTERN MATCHING
-** =======================================================
-*/
+/**
+ ** @$1======================================================
+ ** PATTERN MATCHING
+ ** =======================================================
+ */
 
 
 #define CAP_UNFINISHED	(-1)
@@ -367,11 +367,11 @@ typedef struct MatchState {
 } MatchState;
 
 
-/* recursive function */
+/** recursive function */
 static const char *match (MatchState *ms, const char *s, const char *p);
 
 
-/* maximum recursion depth for 'match' */
+/** maximum recursion depth for 'match' */
 #if !defined(MAXCCALLS)
 #define MAXCCALLS	200
 #endif
@@ -689,13 +689,13 @@ static const char *lmemfind (const char *s1, size_t l1,
 }
 
 
-/*
-** get information about the i-th capture. If there are no captures
-** and 'i==0', return information about the whole match, which
-** is the range 's'..'e'. If the capture is a string, return
-** its length and put its address in '*cap'. If it is an integer
-** (a position), push it on the stack and return CAP_POSITION.
-*/
+/**
+ ** get information about the i-th capture. If there are no captures
+ ** and 'i==0', return information about the whole match, which
+ ** is the range 's'..'e'. If the capture is a string, return
+ ** its length and put its address in '*cap'. If it is an integer
+ ** (a position), push it on the stack and return CAP_POSITION.
+ */
 static size_t get_onecapture (MatchState *ms, int i, const char *s,
                               const char *e, const char **cap) {
   if (i >= ms->level) {
@@ -716,9 +716,9 @@ static size_t get_onecapture (MatchState *ms, int i, const char *s,
 }
 
 
-/*
-** Push the i-th capture on the stack.
-*/
+/**
+ ** Push the i-th capture on the stack.
+ */
 static void push_onecapture (MatchState *ms, int i, const char *s,
                                                     const char *e) {
   const char *cap;
@@ -739,7 +739,7 @@ static int push_captures (MatchState *ms, const char *s, const char *e) {
 }
 
 
-/* check whether pattern has no special characters */
+/** check whether pattern has no special characters */
 static int nospecials (const char *p, size_t l) {
   size_t upto = 0;
   do {
@@ -823,7 +823,7 @@ static int str_match (lua_State *L) {
 }
 
 
-/* state for 'gmatch' */
+/** state for 'gmatch' */
 typedef struct GMatchState {
   const char *src;  /* current position */
   const char *p;  /* pattern */
@@ -895,11 +895,11 @@ static void add_s (MatchState *ms, luaL_Buffer *b, const char *s,
 }
 
 
-/*
-** Add the replacement value to the string buffer 'b'.
-** Return true if the original string was changed. (Function calls and
-** table indexing resulting in nil or false do not change the subject.)
-*/
+/**
+ ** Add the replacement value to the string buffer 'b'.
+ ** Return true if the original string was changed. (Function calls and
+ ** table indexing resulting in nil or false do not change the subject.)
+ */
 static int add_value (MatchState *ms, luaL_Buffer *b, const char *s,
                                       const char *e, int tr) {
   lua_State *L = ms->L;
@@ -979,37 +979,37 @@ static int str_gsub (lua_State *L) {
   return 2;
 }
 
-/* }====================================================== */
+/** @$1====================================================== */
 
 
 
-/*
-** {======================================================
-** STRING FORMAT
-** =======================================================
-*/
+/**
+ ** @$1======================================================
+ ** STRING FORMAT
+ ** =======================================================
+ */
 
 #if !defined(lua_number2strx)	/* { */
 
-/*
-** Hexadecimal floating-point formatter
-*/
+/**
+ ** Hexadecimal floating-point formatter
+ */
 
 #define SIZELENMOD	(sizeof(LUA_NUMBER_FRMLEN)/sizeof(char))
 
 
-/*
-** Number of bits that goes into the first digit. It can be any value
-** between 1 and 4; the following definition tries to align the number
-** to nibble boundaries by making what is left after that first digit a
-** multiple of 4.
-*/
+/**
+ ** Number of bits that goes into the first digit. It can be any value
+ ** between 1 and 4; the following definition tries to align the number
+ ** to nibble boundaries by making what is left after that first digit a
+ ** multiple of 4.
+ */
 #define L_NBFD		((l_floatatt(MANT_DIG) - 1)%4 + 1)
 
 
-/*
-** Add integer part of 'x' to buffer and return new 'x'
-*/
+/**
+ ** Add integer part of 'x' to buffer and return new 'x'
+ */
 static lua_Number adddigit (char *buff, int n, lua_Number x) {
   lua_Number dd = l_mathop(floor)(x);  /* get integer part from 'x' */
   int d = (int)dd;
@@ -1066,35 +1066,35 @@ static int lua_number2strx (lua_State *L, char *buff, int sz,
 #endif				/* } */
 
 
-/*
-** Maximum size for items formatted with '%f'. This size is produced
-** by format('%.99f', -maxfloat), and is equal to 99 + 3 ('-', '.',
-** and '\0') + number of decimal digits to represent maxfloat (which
-** is maximum exponent + 1). (99+3+1, adding some extra, 110)
-*/
+/**
+ ** Maximum size for items formatted with '%f'. This size is produced
+ ** by format('%.99f', -maxfloat), and is equal to 99 + 3 ('-', '.',
+ ** and '\0') + number of decimal digits to represent maxfloat (which
+ ** is maximum exponent + 1). (99+3+1, adding some extra, 110)
+ */
 #define MAX_ITEMF	(110 + l_floatatt(MAX_10_EXP))
 
 
-/*
-** All formats except '%f' do not need that large limit.  The other
-** float formats use exponents, so that they fit in the 99 limit for
-** significant digits; 's' for large strings and 'q' add items directly
-** to the buffer; all integer formats also fit in the 99 limit.  The
-** worst case are floats: they may need 99 significant digits, plus
-** '0x', '-', '.', 'e+XXXX', and '\0'. Adding some extra, 120.
-*/
+/**
+ ** All formats except '%f' do not need that large limit.  The other
+ ** float formats use exponents, so that they fit in the 99 limit for
+ ** significant digits; 's' for large strings and 'q' add items directly
+ ** to the buffer; all integer formats also fit in the 99 limit.  The
+ ** worst case are floats: they may need 99 significant digits, plus
+ ** '0x', '-', '.', 'e+XXXX', and '\0'. Adding some extra, 120.
+ */
 #define MAX_ITEM	120
 
 
-/* valid flags in a format specification */
+/** valid flags in a format specification */
 #if !defined(L_FMTFLAGS)
 #define L_FMTFLAGS	"-+ #0"
 #endif
 
 
-/*
-** maximum size of each format specification (such as "%-099.99d")
-*/
+/**
+ ** maximum size of each format specification (such as "%-099.99d")
+ */
 #define MAX_FORMAT	32
 
 
@@ -1121,12 +1121,12 @@ static void addquoted (luaL_Buffer *b, const char *s, size_t len) {
 }
 
 
-/*
-** Serialize a floating-point number in such a way that it can be
-** scanned back by Lua. Use hexadecimal format for "common" numbers
-** (to preserve precision); inf, -inf, and NaN are handled separately.
-** (NaN cannot be expressed as a numeral, so we write '(0/0)' for it.)
-*/
+/**
+ ** Serialize a floating-point number in such a way that it can be
+ ** scanned back by Lua. Use hexadecimal format for "common" numbers
+ ** (to preserve precision); inf, -inf, and NaN are handled separately.
+ ** (NaN cannot be expressed as a numeral, so we write '(0/0)' for it.)
+ */
 static int quotefloat (lua_State *L, char *buff, lua_Number n) {
   const char *s;  /* for the fixed representations */
   if (n == (lua_Number)HUGE_VAL)  /* inf? */
@@ -1208,9 +1208,9 @@ static const char *scanformat (lua_State *L, const char *strfrmt, char *form) {
 }
 
 
-/*
-** add length modifier into formats
-*/
+/**
+ ** add length modifier into formats
+ */
 static void addlenmod (char *form, const char *lenmod) {
   size_t l = strlen(form);
   size_t lm = strlen(lenmod);
@@ -1312,42 +1312,42 @@ static int str_format (lua_State *L) {
   return 1;
 }
 
-/* }====================================================== */
+/** @$1====================================================== */
 
 
-/*
-** {======================================================
-** PACK/UNPACK
-** =======================================================
-*/
+/**
+ ** @$1======================================================
+ ** PACK/UNPACK
+ ** =======================================================
+ */
 
 
-/* value used for padding */
+/** value used for padding */
 #if !defined(LUAL_PACKPADBYTE)
 #define LUAL_PACKPADBYTE		0x00
 #endif
 
-/* maximum size for the binary representation of an integer */
+/** maximum size for the binary representation of an integer */
 #define MAXINTSIZE	16
 
-/* number of bits in a character */
+/** number of bits in a character */
 #define NB	CHAR_BIT
 
-/* mask for one character (NB 1's) */
+/** mask for one character (NB 1's) */
 #define MC	((1 << NB) - 1)
 
-/* size of a lua_Integer */
+/** size of a lua_Integer */
 #define SZINT	((int)sizeof(lua_Integer))
 
 
-/* dummy union to get native endianness */
+/** dummy union to get native endianness */
 static const union {
   int dummy;
   char little;  /* true iff machine is little endian */
 } nativeendian = {1};
 
 
-/* dummy structure to get native alignment requirements */
+/** dummy structure to get native alignment requirements */
 struct cD {
   char c;
   union { double d; void *p; lua_Integer i; lua_Number n; } u;
@@ -1356,9 +1356,9 @@ struct cD {
 #define MAXALIGN	(offsetof(struct cD, u))
 
 
-/*
-** Union for serializing floats
-*/
+/**
+ ** Union for serializing floats
+ */
 typedef union Ftypes {
   float f;
   double d;
@@ -1367,9 +1367,9 @@ typedef union Ftypes {
 } Ftypes;
 
 
-/*
-** information to pack/unpack stuff
-*/
+/**
+ ** information to pack/unpack stuff
+ */
 typedef struct Header {
   lua_State *L;
   int islittle;
@@ -1377,9 +1377,9 @@ typedef struct Header {
 } Header;
 
 
-/*
-** options for pack/unpack
-*/
+/**
+ ** options for pack/unpack
+ */
 typedef enum KOption {
   Kint,		/* signed integers */
   Kuint,	/* unsigned integers */
@@ -1393,10 +1393,10 @@ typedef enum KOption {
 } KOption;
 
 
-/*
-** Read an integer numeral from string 'fmt' or return 'df' if
-** there is no numeral
-*/
+/**
+ ** Read an integer numeral from string 'fmt' or return 'df' if
+ ** there is no numeral
+ */
 static int digit (int c) { return '0' <= c && c <= '9'; }
 
 static int getnum (const char **fmt, int df) {
@@ -1412,10 +1412,10 @@ static int getnum (const char **fmt, int df) {
 }
 
 
-/*
-** Read an integer numeral and raises an error if it is larger
-** than the maximum size for integers.
-*/
+/**
+ ** Read an integer numeral and raises an error if it is larger
+ ** than the maximum size for integers.
+ */
 static int getnumlimit (Header *h, const char **fmt, int df) {
   int sz = getnum(fmt, df);
   if (sz > MAXINTSIZE || sz <= 0)
@@ -1425,9 +1425,9 @@ static int getnumlimit (Header *h, const char **fmt, int df) {
 }
 
 
-/*
-** Initialize Header
-*/
+/**
+ ** Initialize Header
+ */
 static void initheader (lua_State *L, Header *h) {
   h->L = L;
   h->islittle = nativeendian.little;
@@ -1435,9 +1435,9 @@ static void initheader (lua_State *L, Header *h) {
 }
 
 
-/*
-** Read and classify next option. 'size' is filled with option's size.
-*/
+/**
+ ** Read and classify next option. 'size' is filled with option's size.
+ */
 static KOption getoption (Header *h, const char **fmt, int *size) {
   int opt = *((*fmt)++);
   *size = 0;  /* default */
@@ -1476,15 +1476,15 @@ static KOption getoption (Header *h, const char **fmt, int *size) {
 }
 
 
-/*
-** Read, classify, and fill other details about the next option.
-** 'psize' is filled with option's size, 'notoalign' with its
-** alignment requirements.
-** Local variable 'size' gets the size to be aligned. (Kpadal option
-** always gets its full alignment, other options are limited by
-** the maximum alignment ('maxalign'). Kchar option needs no alignment
-** despite its size.
-*/
+/**
+ ** Read, classify, and fill other details about the next option.
+ ** 'psize' is filled with option's size, 'notoalign' with its
+ ** alignment requirements.
+ ** Local variable 'size' gets the size to be aligned. (Kpadal option
+ ** always gets its full alignment, other options are limited by
+ ** the maximum alignment ('maxalign'). Kchar option needs no alignment
+ ** despite its size.
+ */
 static KOption getdetails (Header *h, size_t totalsize,
                            const char **fmt, int *psize, int *ntoalign) {
   KOption opt = getoption(h, fmt, psize);
@@ -1506,12 +1506,12 @@ static KOption getdetails (Header *h, size_t totalsize,
 }
 
 
-/*
-** Pack integer 'n' with 'size' bytes and 'islittle' endianness.
-** The final 'if' handles the case when 'size' is larger than
-** the size of a Lua integer, correcting the extra sign-extension
-** bytes if necessary (by default they would be zeros).
-*/
+/**
+ ** Pack integer 'n' with 'size' bytes and 'islittle' endianness.
+ ** The final 'if' handles the case when 'size' is larger than
+ ** the size of a Lua integer, correcting the extra sign-extension
+ ** bytes if necessary (by default they would be zeros).
+ */
 static void packint (luaL_Buffer *b, lua_Unsigned n,
                      int islittle, int size, int neg) {
   char *buff = luaL_prepbuffsize(b, size);
@@ -1529,10 +1529,10 @@ static void packint (luaL_Buffer *b, lua_Unsigned n,
 }
 
 
-/*
-** Copy 'size' bytes from 'src' to 'dest', correcting endianness if
-** given 'islittle' is different from native endianness.
-*/
+/**
+ ** Copy 'size' bytes from 'src' to 'dest', correcting endianness if
+ ** given 'islittle' is different from native endianness.
+ */
 static void copywithendian (volatile char *dest, volatile const char *src,
                             int size, int islittle) {
   if (islittle == nativeendian.little) {
@@ -1654,14 +1654,14 @@ static int str_packsize (lua_State *L) {
 }
 
 
-/*
-** Unpack an integer with 'size' bytes and 'islittle' endianness.
-** If size is smaller than the size of a Lua integer and integer
-** is signed, must do sign extension (propagating the sign to the
-** higher bits); if size is larger than the size of a Lua integer,
-** it must check the unread bytes to see whether they do not cause an
-** overflow.
-*/
+/**
+ ** Unpack an integer with 'size' bytes and 'islittle' endianness.
+ ** If size is smaller than the size of a Lua integer and integer
+ ** is signed, must do sign extension (propagating the sign to the
+ ** higher bits); if size is larger than the size of a Lua integer,
+ ** it must check the unread bytes to see whether they do not cause an
+ ** overflow.
+ */
 static lua_Integer unpackint (lua_State *L, const char *str,
                               int islittle, int size, int issigned) {
   lua_Unsigned res = 0;
@@ -1753,7 +1753,7 @@ static int str_unpack (lua_State *L) {
   return n + 1;
 }
 
-/* }====================================================== */
+/** @$1====================================================== */
 
 
 static const luaL_Reg strlib[] = {
@@ -1792,12 +1792,11 @@ static void createmetatable (lua_State *L) {
 }
 
 
-/*
-** Open string library
-*/
+/**
+ ** Open string library
+ */
 LUAMOD_API int luaopen_string (lua_State *L) {
   luaL_newlib(L, strlib);
   createmetatable(L);
   return 1;
 }
-

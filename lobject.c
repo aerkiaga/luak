@@ -1,8 +1,8 @@
-/*
-** $Id: lobject.c $
-** Some generic functions over Lua objects
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: lobject.c $
+ ** Some generic functions over Lua objects
+ ** See Copyright Notice in lua.h
+ */
 
 #define lobject_c
 #define LUA_CORE
@@ -29,9 +29,9 @@
 #include "lvm.h"
 
 
-/*
-** Computes ceil(log2(x))
-*/
+/**
+ ** Computes ceil(log2(x))
+ */
 int luaO_ceillog2 (unsigned int x) {
   static const lu_byte log_2[256] = {  /* log_2[i] = ceil(log2(i - 1)) */
     0,1,2,2,3,3,3,3,4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
@@ -146,22 +146,22 @@ static int isneg (const char **s) {
 
 
 
-/*
-** {==================================================================
-** Lua's implementation for 'lua_strx2number'
-** ===================================================================
-*/
+/**
+ ** @{==================================================================
+ ** Lua's implementation for 'lua_strx2number'
+ ** ===================================================================
+ */
 
 #if !defined(lua_strx2number)
 
-/* maximum number of significant digits to read (to avoid overflows
+/** maximum number of significant digits to read (to avoid overflows
    even with single floats) */
 #define MAXSIGDIG	30
 
-/*
-** convert a hexadecimal numeric string to a number, following
-** C99 specification for 'strtod'
-*/
+/**
+ ** convert a hexadecimal numeric string to a number, following
+ ** C99 specification for 'strtod'
+ */
 static lua_Number lua_strx2number (const char *s, char **endptr) {
   int dot = lua_getlocaledecpoint();
   lua_Number r = 0.0;  /* result (accumulator) */
@@ -212,10 +212,10 @@ static lua_Number lua_strx2number (const char *s, char **endptr) {
 }
 
 #endif
-/* }====================================================== */
+/** @}====================================================== */
 
 
-/* maximum length of a numeral */
+/** maximum length of a numeral */
 #if !defined (L_MAXLENNUM)
 #define L_MAXLENNUM	200
 #endif
@@ -230,19 +230,19 @@ static const char *l_str2dloc (const char *s, lua_Number *result, int mode) {
 }
 
 
-/*
-** Convert string 's' to a Lua number (put in 'result'). Return NULL
-** on fail or the address of the ending '\0' on success.
-** 'pmode' points to (and 'mode' contains) special things in the string:
-** - 'x'/'X' means a hexadecimal numeral
-** - 'n'/'N' means 'inf' or 'nan' (which should be rejected)
-** - '.' just optimizes the search for the common case (nothing special)
-** This function accepts both the current locale or a dot as the radix
-** mark. If the conversion fails, it may mean number has a dot but
-** locale accepts something else. In that case, the code copies 's'
-** to a buffer (because 's' is read-only), changes the dot to the
-** current locale radix mark, and tries to convert again.
-*/
+/**
+ ** Convert string 's' to a Lua number (put in 'result'). Return NULL
+ ** on fail or the address of the ending '\0' on success.
+ ** 'pmode' points to (and 'mode' contains) special things in the string:
+ ** - 'x'/'X' means a hexadecimal numeral
+ ** - 'n'/'N' means 'inf' or 'nan' (which should be rejected)
+ ** - '.' just optimizes the search for the common case (nothing special)
+ ** This function accepts both the current locale or a dot as the radix
+ ** mark. If the conversion fails, it may mean number has a dot but
+ ** locale accepts something else. In that case, the code copies 's'
+ ** to a buffer (because 's' is read-only), changes the dot to the
+ ** current locale radix mark, and tries to convert again.
+ */
 static const char *l_str2d (const char *s, lua_Number *result) {
   const char *endptr;
   const char *pmode = strpbrk(s, ".xXnN");
@@ -333,13 +333,13 @@ int luaO_utf8esc (char *buff, unsigned long x) {
 }
 
 
-/* maximum length of the conversion of a number to a string */
+/** maximum length of the conversion of a number to a string */
 #define MAXNUMBER2STR	50
 
 
-/*
-** Convert a number object to a string, adding it to a buffer
-*/
+/**
+ ** Convert a number object to a string, adding it to a buffer
+ */
 static int tostringbuff (TValue *obj, char *buff) {
   int len;
   lua_assert(ttisnumber(obj));
@@ -356,9 +356,9 @@ static int tostringbuff (TValue *obj, char *buff) {
 }
 
 
-/*
-** Convert a number object to a Lua string, replacing the value at 'obj'
-*/
+/**
+ ** Convert a number object to a Lua string, replacing the value at 'obj'
+ */
 void luaO_tostring (lua_State *L, TValue *obj) {
   char buff[MAXNUMBER2STR];
   int len = tostringbuff(obj, buff);
@@ -368,16 +368,16 @@ void luaO_tostring (lua_State *L, TValue *obj) {
 
 
 
-/*
-** {==================================================================
-** 'luaO_pushvfstring'
-** ===================================================================
-*/
+/**
+ ** @{==================================================================
+ ** 'luaO_pushvfstring'
+ ** ===================================================================
+ */
 
-/* size for buffer space used by 'luaO_pushvfstring' */
+/** size for buffer space used by 'luaO_pushvfstring' */
 #define BUFVFS		400
 
-/* buffer used by 'luaO_pushvfstring' */
+/** buffer used by 'luaO_pushvfstring' */
 typedef struct BuffFS {
   lua_State *L;
   int pushed;  /* number of string pieces already on the stack */
@@ -386,10 +386,10 @@ typedef struct BuffFS {
 } BuffFS;
 
 
-/*
-** Push given string to the stack, as part of the buffer. If the stack
-** is almost full, join all partial strings in the stack into one.
-*/
+/**
+ ** Push given string to the stack, as part of the buffer. If the stack
+ ** is almost full, join all partial strings in the stack into one.
+ */
 static void pushstr (BuffFS *buff, const char *str, size_t l) {
   lua_State *L = buff->L;
   setsvalue2s(L, L->top, luaS_newlstr(L, str, l));
@@ -402,19 +402,19 @@ static void pushstr (BuffFS *buff, const char *str, size_t l) {
 }
 
 
-/*
-** empty the buffer space into the stack
-*/
+/**
+ ** empty the buffer space into the stack
+ */
 static void clearbuff (BuffFS *buff) {
   pushstr(buff, buff->space, buff->blen);  /* push buffer contents */
   buff->blen = 0;  /* space now is empty */
 }
 
 
-/*
-** Get a space of size 'sz' in the buffer. If buffer has not enough
-** space, empty it. 'sz' must fit in an empty buffer.
-*/
+/**
+ ** Get a space of size 'sz' in the buffer. If buffer has not enough
+ ** space, empty it. 'sz' must fit in an empty buffer.
+ */
 static char *getbuff (BuffFS *buff, int sz) {
   lua_assert(buff->blen <= BUFVFS); lua_assert(sz <= BUFVFS);
   if (sz > BUFVFS - buff->blen)  /* not enough space? */
@@ -426,10 +426,10 @@ static char *getbuff (BuffFS *buff, int sz) {
 #define addsize(b,sz)	((b)->blen += (sz))
 
 
-/*
-** Add 'str' to the buffer. If string is larger than the buffer space,
-** push the string directly to the stack.
-*/
+/**
+ ** Add 'str' to the buffer. If string is larger than the buffer space,
+ ** push the string directly to the stack.
+ */
 static void addstr2buff (BuffFS *buff, const char *str, size_t slen) {
   if (slen <= BUFVFS) {  /* does string fit into buffer? */
     char *bf = getbuff(buff, cast_int(slen));
@@ -443,9 +443,9 @@ static void addstr2buff (BuffFS *buff, const char *str, size_t slen) {
 }
 
 
-/*
-** Add a number to the buffer.
-*/
+/**
+ ** Add a number to the buffer.
+ */
 static void addnum2buff (BuffFS *buff, TValue *num) {
   char *numbuff = getbuff(buff, MAXNUMBER2STR);
   int len = tostringbuff(num, numbuff);  /* format number into 'numbuff' */
@@ -453,10 +453,10 @@ static void addnum2buff (BuffFS *buff, TValue *num) {
 }
 
 
-/*
-** this function handles only '%d', '%c', '%f', '%p', '%s', and '%%'
+/**
+ ** this function handles only '%d', '%c', '%f', '%p', '%s', and '%%'
    conventional formats, plus Lua-specific '%I' and '%U'
-*/
+ */
 const char *luaO_pushvfstring (lua_State *L, const char *fmt, va_list argp) {
   BuffFS buff;  /* holds last part of the result */
   const char *e;  /* points to next '%' */
@@ -536,7 +536,7 @@ const char *luaO_pushfstring (lua_State *L, const char *fmt, ...) {
   return msg;
 }
 
-/* }================================================================== */
+/** @}================================================================== */
 
 
 #define RETS	"..."

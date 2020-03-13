@@ -1,8 +1,8 @@
-/*
-** $Id: ljumptab.h $
-** Jump Table for the Lua interpreter
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: ljumptab.h $
+ ** Jump Table for the Lua interpreter
+ ** See Copyright Notice in lua.h
+ */
 
 
 #undef vmdispatch
@@ -19,10 +19,10 @@
 static void *disptab[NUM_OPCODES] = {
 
 #if 0
-** you can update the following list with this command:
-**
-**  sed -n '/^OP_/\!d; s/OP_/\&\&L_OP_/ ; s/,.*/,/ ; s/\/.*// ; p'  lopcodes.h
-**
+ ** you can update the following list with this command:
+ **
+ **  sed -n '/^OP_/\!d; s/OP_/\&\&L_OP_/ ; s/,.*/,/ ; s/\/.*// ; p'  lopcodes.h
+ **
 #endif
 
 &&L_OP_MOVE,

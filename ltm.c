@@ -1,8 +1,8 @@
-/*
-** $Id: ltm.c $
-** Tag methods
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: ltm.c $
+ ** Tag methods
+ ** See Copyright Notice in lua.h
+ */
 
 #define ltm_c
 #define LUA_CORE
@@ -53,10 +53,10 @@ void luaT_init (lua_State *L) {
 }
 
 
-/*
-** function to be used with macro "fasttm": optimized for absence of
-** tag methods
-*/
+/**
+ ** function to be used with macro "fasttm": optimized for absence of
+ ** tag methods
+ */
 const TValue *luaT_gettm (Table *events, TMS event, TString *ename) {
   const TValue *tm = luaH_getshortstr(events, ename);
   lua_assert(event <= TM_EQ);
@@ -84,10 +84,10 @@ const TValue *luaT_gettmbyobj (lua_State *L, const TValue *o, TMS event) {
 }
 
 
-/*
-** Return the name of the type of an object. For tables and userdata
-** with metatable, use their '__name' metafield, if present.
-*/
+/**
+ ** Return the name of the type of an object. For tables and userdata
+ ** with metatable, use their '__name' metafield, if present.
+ */
 const char *luaT_objtypename (lua_State *L, const TValue *o) {
   Table *mt;
   if ((ttistable(o) && (mt = hvalue(o)->metatable) != NULL) ||
@@ -188,15 +188,15 @@ void luaT_trybiniTM (lua_State *L, const TValue *p1, lua_Integer i2,
 }
 
 
-/*
-** Calls an order tag method.
-** For lessequal, LUA_COMPAT_LT_LE keeps compatibility with old
-** behavior: if there is no '__le', try '__lt', based on l <= r iff
-** !(r < l) (assuming a total order). If the metamethod yields during
-** this substitution, the continuation has to know about it (to negate
-** the result of r<l); bit CIST_LEQ in the call status keeps that
-** information.
-*/
+/**
+ ** Calls an order tag method.
+ ** For lessequal, LUA_COMPAT_LT_LE keeps compatibility with old
+ ** behavior: if there is no '__le', try '__lt', based on l <= r iff
+ ** !(r < l) (assuming a total order). If the metamethod yields during
+ ** this substitution, the continuation has to know about it (to negate
+ ** the result of r<l); bit CIST_LEQ in the call status keeps that
+ ** information.
+ */
 int luaT_callorderTM (lua_State *L, const TValue *p1, const TValue *p2,
                       TMS event) {
   if (callbinTM(L, p1, p2, L->top, event))  /* try original event */

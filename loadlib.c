@@ -1,12 +1,12 @@
-/*
-** $Id: loadlib.c $
-** Dynamic library loader for Lua
-** See Copyright Notice in lua.h
-**
-** This module contains an implementation of loadlib for Unix systems
-** that have dlfcn, an implementation for Windows, and a stub for other
-** systems.
-*/
+/**
+ ** $Id: loadlib.c $
+ ** Dynamic library loader for Lua
+ ** See Copyright Notice in lua.h
+ **
+ ** This module contains an implementation of loadlib for Unix systems
+ ** that have dlfcn, an implementation for Windows, and a stub for other
+ ** systems.
+ */
 
 #define loadlib_c
 #define LUA_LIB
@@ -24,21 +24,21 @@
 #include "lualib.h"
 
 
-/*
-** LUA_IGMARK is a mark to ignore all before it when building the
-** luaopen_ function name.
-*/
+/**
+ ** LUA_IGMARK is a mark to ignore all before it when building the
+ ** luaopen_ function name.
+ */
 #if !defined (LUA_IGMARK)
 #define LUA_IGMARK		"-"
 #endif
 
 
-/*
-** LUA_CSUBSEP is the character that replaces dots in submodule names
-** when searching for a C loader.
-** LUA_LSUBSEP is the character that replaces dots in submodule names
-** when searching for a Lua loader.
-*/
+/**
+ ** LUA_CSUBSEP is the character that replaces dots in submodule names
+ ** when searching for a C loader.
+ ** LUA_LSUBSEP is the character that replaces dots in submodule names
+ ** when searching for a Lua loader.
+ */
 #if !defined(LUA_CSUBSEP)
 #define LUA_CSUBSEP		LUA_DIRSEP
 #endif
@@ -48,17 +48,17 @@
 #endif
 
 
-/* prefix for open functions in C libraries */
+/** prefix for open functions in C libraries */
 #define LUA_POF		"luaopen_"
 
-/* separator for open functions in C libraries */
+/** separator for open functions in C libraries */
 #define LUA_OFSEP	"_"
 
 
-/*
-** key for table in the registry that keeps handles
-** for all loaded C libraries
-*/
+/**
+ ** key for table in the registry that keeps handles
+ ** for all loaded C libraries
+ */
 static const char *const CLIBS = "_CLIBS";
 
 #define LIB_FAIL	"open"
@@ -67,50 +67,50 @@ static const char *const CLIBS = "_CLIBS";
 #define setprogdir(L)           ((void)0)
 
 
-/*
-** system-dependent functions
-*/
+/**
+ ** system-dependent functions
+ */
 
-/*
-** unload library 'lib'
-*/
+/**
+ ** unload library 'lib'
+ */
 static void lsys_unloadlib (void *lib);
 
-/*
-** load C library in file 'path'. If 'seeglb', load with all names in
-** the library global.
-** Returns the library; in case of error, returns NULL plus an
-** error string in the stack.
-*/
+/**
+ ** load C library in file 'path'. If 'seeglb', load with all names in
+ ** the library global.
+ ** Returns the library; in case of error, returns NULL plus an
+ ** error string in the stack.
+ */
 static void *lsys_load (lua_State *L, const char *path, int seeglb);
 
-/*
-** Try to find a function named 'sym' in library 'lib'.
-** Returns the function; in case of error, returns NULL plus an
-** error string in the stack.
-*/
+/**
+ ** Try to find a function named 'sym' in library 'lib'.
+ ** Returns the function; in case of error, returns NULL plus an
+ ** error string in the stack.
+ */
 static lua_CFunction lsys_sym (lua_State *L, void *lib, const char *sym);
 
 
 
 
 #if defined(LUA_USE_DLOPEN)	/* { */
-/*
-** {========================================================================
-** This is an implementation of loadlib based on the dlfcn interface.
-** The dlfcn interface is available in Linux, SunOS, Solaris, IRIX, FreeBSD,
-** NetBSD, AIX 4.2, HPUX 11, and  probably most other Unix flavors, at least
-** as an emulation layer on top of native functions.
-** =========================================================================
-*/
+/**
+ ** @{========================================================================
+ ** This is an implementation of loadlib based on the dlfcn interface.
+ ** The dlfcn interface is available in Linux, SunOS, Solaris, IRIX, FreeBSD,
+ ** NetBSD, AIX 4.2, HPUX 11, and  probably most other Unix flavors, at least
+ ** as an emulation layer on top of native functions.
+ ** =========================================================================
+ */
 
 #include <dlfcn.h>
 
-/*
-** Macro to convert pointer-to-void* to pointer-to-function. This cast
-** is undefined according to ISO C, but POSIX assumes that it works.
-** (The '__extension__' in gnu compilers is only to avoid warnings.)
-*/
+/**
+ ** Macro to convert pointer-to-void* to pointer-to-function. This cast
+ ** is undefined according to ISO C, but POSIX assumes that it works.
+ ** (The '__extension__' in gnu compilers is only to avoid warnings.)
+ */
 #if defined(__GNUC__)
 #define cast_func(p) (__extension__ (lua_CFunction)(p))
 #else
@@ -136,23 +136,23 @@ static lua_CFunction lsys_sym (lua_State *L, void *lib, const char *sym) {
   return f;
 }
 
-/* }====================================================== */
+/** @}====================================================== */
 
 
 
 #elif defined(LUA_DL_DLL)	/* }{ */
-/*
-** {======================================================================
-** This is an implementation of loadlib for Windows using native functions.
-** =======================================================================
-*/
+/**
+ ** @{======================================================================
+ ** This is an implementation of loadlib for Windows using native functions.
+ ** =======================================================================
+ */
 
 #include <windows.h>
 
 
-/*
-** optional flags for LoadLibraryEx
-*/
+/**
+ ** optional flags for LoadLibraryEx
+ */
 #if !defined(LUA_LLE_FLAGS)
 #define LUA_LLE_FLAGS	0
 #endif
@@ -161,10 +161,10 @@ static lua_CFunction lsys_sym (lua_State *L, void *lib, const char *sym) {
 #undef setprogdir
 
 
-/*
-** Replace in the path (on the top of the stack) any occurrence
-** of LUA_EXEC_DIR with the executable's path.
-*/
+/**
+ ** Replace in the path (on the top of the stack) any occurrence
+ ** of LUA_EXEC_DIR with the executable's path.
+ */
 static void setprogdir (lua_State *L) {
   char buff[MAX_PATH + 1];
   char *lb;
@@ -211,15 +211,15 @@ static lua_CFunction lsys_sym (lua_State *L, void *lib, const char *sym) {
   return f;
 }
 
-/* }====================================================== */
+/** @}====================================================== */
 
 
 #else				/* }{ */
-/*
-** {======================================================
-** Fallback for other systems
-** =======================================================
-*/
+/**
+ ** @{======================================================
+ ** Fallback for other systems
+ ** =======================================================
+ */
 
 #undef LIB_FAIL
 #define LIB_FAIL	"absent"
@@ -246,20 +246,20 @@ static lua_CFunction lsys_sym (lua_State *L, void *lib, const char *sym) {
   return NULL;
 }
 
-/* }====================================================== */
+/** @}====================================================== */
 #endif				/* } */
 
 
-/*
-** {==================================================================
-** Set Paths
-** ===================================================================
-*/
+/**
+ ** @{==================================================================
+ ** Set Paths
+ ** ===================================================================
+ */
 
-/*
-** LUA_PATH_VAR and LUA_CPATH_VAR are the names of the environment
-** variables that Lua check to set its paths.
-*/
+/**
+ ** LUA_PATH_VAR and LUA_CPATH_VAR are the names of the environment
+ ** variables that Lua check to set its paths.
+ */
 #if !defined(LUA_PATH_VAR)
 #define LUA_PATH_VAR    "LUA_PATH"
 #endif
@@ -272,9 +272,9 @@ static lua_CFunction lsys_sym (lua_State *L, void *lib, const char *sym) {
 #define AUXMARK         "\1"	/* auxiliary mark */
 
 
-/*
-** return registry.LUA_NOENV as a boolean
-*/
+/**
+ ** return registry.LUA_NOENV as a boolean
+ */
 static int noenv (lua_State *L) {
   int b;
   lua_getfield(L, LUA_REGISTRYINDEX, "LUA_NOENV");
@@ -284,9 +284,9 @@ static int noenv (lua_State *L) {
 }
 
 
-/*
-** Set a path
-*/
+/**
+ ** Set a path
+ */
 static void setpath (lua_State *L, const char *fieldname,
                                    const char *envname,
                                    const char *dft) {
@@ -319,12 +319,12 @@ static void setpath (lua_State *L, const char *fieldname,
   lua_pop(L, 1);  /* pop versioned variable name ('nver') */
 }
 
-/* }================================================================== */
+/** @}================================================================== */
 
 
-/*
-** return registry.CLIBS[path]
-*/
+/**
+ ** return registry.CLIBS[path]
+ */
 static void *checkclib (lua_State *L, const char *path) {
   void *plib;
   lua_getfield(L, LUA_REGISTRYINDEX, CLIBS);
@@ -335,10 +335,10 @@ static void *checkclib (lua_State *L, const char *path) {
 }
 
 
-/*
-** registry.CLIBS[path] = plib        -- for queries
-** registry.CLIBS[#CLIBS + 1] = plib  -- also keep a list of all libraries
-*/
+/**
+ ** registry.CLIBS[path] = plib        -- for queries
+ ** registry.CLIBS[#CLIBS + 1] = plib  -- also keep a list of all libraries
+ */
 static void addtoclib (lua_State *L, const char *path, void *plib) {
   lua_getfield(L, LUA_REGISTRYINDEX, CLIBS);
   lua_pushlightuserdata(L, plib);
@@ -349,10 +349,10 @@ static void addtoclib (lua_State *L, const char *path, void *plib) {
 }
 
 
-/*
-** __gc tag method for CLIBS table: calls 'lsys_unloadlib' for all lib
-** handles in list CLIBS
-*/
+/**
+ ** __gc tag method for CLIBS table: calls 'lsys_unloadlib' for all lib
+ ** handles in list CLIBS
+ */
 static int gctm (lua_State *L) {
   lua_Integer n = luaL_len(L, 1);
   for (; n >= 1; n--) {  /* for each handle, in reverse order */
@@ -365,21 +365,21 @@ static int gctm (lua_State *L) {
 
 
 
-/* error codes for 'lookforfunc' */
+/** error codes for 'lookforfunc' */
 #define ERRLIB		1
 #define ERRFUNC		2
 
-/*
-** Look for a C function named 'sym' in a dynamically loaded library
-** 'path'.
-** First, check whether the library is already loaded; if not, try
-** to load it.
-** Then, if 'sym' is '*', return true (as library has been loaded).
-** Otherwise, look for symbol 'sym' in the library and push a
-** C function with that symbol.
-** Return 0 and 'true' or a function in the stack; in case of
-** errors, return an error code and an error message in the stack.
-*/
+/**
+ ** Look for a C function named 'sym' in a dynamically loaded library
+ ** 'path'.
+ ** First, check whether the library is already loaded; if not, try
+ ** to load it.
+ ** Then, if 'sym' is '*', return true (as library has been loaded).
+ ** Otherwise, look for symbol 'sym' in the library and push a
+ ** C function with that symbol.
+ ** Return 0 and 'true' or a function in the stack; in case of
+ ** errors, return an error code and an error message in the stack.
+ */
 static int lookforfunc (lua_State *L, const char *path, const char *sym) {
   void *reg = checkclib(L, path);  /* check loaded C libraries */
   if (reg == NULL) {  /* must load library? */
@@ -417,11 +417,11 @@ static int ll_loadlib (lua_State *L) {
 
 
 
-/*
-** {======================================================
-** 'require' function
-** =======================================================
-*/
+/**
+ ** @{======================================================
+ ** 'require' function
+ ** =======================================================
+ */
 
 
 static int readable (const char *filename) {
@@ -432,11 +432,11 @@ static int readable (const char *filename) {
 }
 
 
-/*
-** Get the next name in '*path' = 'name1;name2;name3;...', changing
-** the ending ';' to '\0' to create a zero-terminated string. Return
-** NULL when list ends.
-*/
+/**
+ ** Get the next name in '*path' = 'name1;name2;name3;...', changing
+ ** the ending ';' to '\0' to create a zero-terminated string. Return
+ ** NULL when list ends.
+ */
 static const char *getnextfilename (char **path, char *end) {
   char *sep;
   char *name = *path;
@@ -455,12 +455,12 @@ static const char *getnextfilename (char **path, char *end) {
 }
 
 
-/*
-** Given a path such as ";blabla.so;blublu.so", pushes the string
-**
-** no file 'blabla.so'
-**	no file 'blublu.so'
-*/
+/**
+ ** Given a path such as ";blabla.so;blublu.so", pushes the string
+ **
+ ** no file 'blabla.so'
+ **	no file 'blublu.so'
+ */
 static void pusherrornotfound (lua_State *L, const char *path) {
   luaL_Buffer b;
   luaL_buffinit(L, &b);
@@ -544,14 +544,14 @@ static int searcher_Lua (lua_State *L) {
 }
 
 
-/*
-** Try to find a load function for module 'modname' at file 'filename'.
-** First, change '.' to '_' in 'modname'; then, if 'modname' has
-** the form X-Y (that is, it has an "ignore mark"), build a function
-** name "luaopen_X" and look for it. (For compatibility, if that
-** fails, it also tries "luaopen_Y".) If there is no ignore mark,
-** look for a function named "luaopen_modname".
-*/
+/**
+ ** Try to find a load function for module 'modname' at file 'filename'.
+ ** First, change '.' to '_' in 'modname'; then, if 'modname' has
+ ** the form X-Y (that is, it has an "ignore mark"), build a function
+ ** name "luaopen_X" and look for it. (For compatibility, if that
+ ** fails, it also tries "luaopen_Y".) If there is no ignore mark,
+ ** look for a function named "luaopen_modname".
+ */
 static int loadfunc (lua_State *L, const char *filename, const char *modname) {
   const char *openfunc;
   const char *mark;
@@ -675,7 +675,7 @@ static int ll_require (lua_State *L) {
   return 2;  /* return module result and loader data */
 }
 
-/* }====================================================== */
+/** @}====================================================== */
 
 
 
@@ -715,10 +715,10 @@ static void createsearcherstable (lua_State *L) {
 }
 
 
-/*
-** create table CLIBS to keep track of loaded C libraries,
-** setting a finalizer to close all libraries when closing state.
-*/
+/**
+ ** create table CLIBS to keep track of loaded C libraries,
+ ** setting a finalizer to close all libraries when closing state.
+ */
 static void createclibstable (lua_State *L) {
   luaL_getsubtable(L, LUA_REGISTRYINDEX, CLIBS);  /* create CLIBS table */
   lua_createtable(L, 0, 1);  /* create metatable for CLIBS */

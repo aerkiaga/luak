@@ -1,8 +1,8 @@
-/*
-** $Id: lstate.c $
-** Global State
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: lstate.c $
+ ** Global State
+ ** See Copyright Notice in lua.h
+ */
 
 #define lstate_c
 #define LUA_CORE
@@ -29,18 +29,18 @@
 
 
 
-/*
-** thread state + extra space
-*/
+/**
+ ** thread state + extra space
+ */
 typedef struct LX {
   lu_byte extra_[LUA_EXTRASPACE];
   lua_State l;
 } LX;
 
 
-/*
-** Main thread combines a thread state and the global state
-*/
+/**
+ ** Main thread combines a thread state and the global state
+ */
 typedef struct LG {
   LX l;
   global_State g;
@@ -51,19 +51,19 @@ typedef struct LG {
 #define fromstate(L)	(cast(LX *, cast(lu_byte *, (L)) - offsetof(LX, l)))
 
 
-/*
-** A macro to create a "random" seed when a state is created;
-** the seed is used to randomize string hashes.
-*/
+/**
+ ** A macro to create a "random" seed when a state is created;
+ ** the seed is used to randomize string hashes.
+ */
 #if !defined(luai_makeseed)
 
 #include <time.h>
 
-/*
-** Compute an initial seed with some level of randomness.
-** Rely on Address Space Layout Randomization (if present) and
-** current time.
-*/
+/**
+ ** Compute an initial seed with some level of randomness.
+ ** Rely on Address Space Layout Randomization (if present) and
+ ** current time.
+ */
 #define addbuff(b,p,e) \
   { size_t t = cast_sizet(e); \
     memcpy(b + p, &t, sizeof(t)); p += sizeof(t); }
@@ -82,10 +82,10 @@ static unsigned int luai_makeseed (lua_State *L) {
 #endif
 
 
-/*
-** set GCdebt to a new value keeping the value (totalbytes + GCdebt)
-** invariant (and avoiding underflows in 'totalbytes')
-*/
+/**
+ ** set GCdebt to a new value keeping the value (totalbytes + GCdebt)
+ ** invariant (and avoiding underflows in 'totalbytes')
+ */
 void luaE_setdebt (global_State *g, l_mem debt) {
   l_mem tb = gettotalbytes(g);
   lua_assert(tb > 0);
@@ -119,18 +119,18 @@ LUA_API int lua_setcstacklimit (lua_State *L, unsigned int limit) {
 }
 
 
-/*
-** Decrement count of "C calls" and check for overflows. In case of
-** a stack overflow, check appropriate error ("regular" overflow or
-** overflow while handling stack overflow).  If 'nCcalls' is smaller
-** than CSTACKERR but larger than CSTACKMARK, it means it has just
-** entered the "overflow zone", so the function raises an overflow
-** error.  If 'nCcalls' is smaller than CSTACKMARK (which means it is
-** already handling an overflow) but larger than CSTACKERRMARK, does
-** not report an error (to allow message handling to work). Otherwise,
-** report a stack overflow while handling a stack overflow (probably
-** caused by a repeating error in the message handling function).
-*/
+/**
+ ** Decrement count of "C calls" and check for overflows. In case of
+ ** a stack overflow, check appropriate error ("regular" overflow or
+ ** overflow while handling stack overflow).  If 'nCcalls' is smaller
+ ** than CSTACKERR but larger than CSTACKMARK, it means it has just
+ ** entered the "overflow zone", so the function raises an overflow
+ ** error.  If 'nCcalls' is smaller than CSTACKMARK (which means it is
+ ** already handling an overflow) but larger than CSTACKERRMARK, does
+ ** not report an error (to allow message handling to work). Otherwise,
+ ** report a stack overflow while handling a stack overflow (probably
+ ** caused by a repeating error in the message handling function).
+ */
 
 void luaE_enterCcall (lua_State *L) {
   int ncalls = getCcalls(L);
@@ -168,9 +168,9 @@ CallInfo *luaE_extendCI (lua_State *L) {
 }
 
 
-/*
-** free all CallInfo structures not in use by a thread
-*/
+/**
+ ** free all CallInfo structures not in use by a thread
+ */
 void luaE_freeCI (lua_State *L) {
   CallInfo *ci = L->ci;
   CallInfo *next = ci->next;
@@ -185,9 +185,9 @@ void luaE_freeCI (lua_State *L) {
 }
 
 
-/*
-** free half of the CallInfo structures not in use by a thread
-*/
+/**
+ ** free half of the CallInfo structures not in use by a thread
+ */
 void luaE_shrinkCI (lua_State *L) {
   CallInfo *ci = L->ci;
   CallInfo *next2;  /* next's next */
@@ -237,9 +237,9 @@ static void freestack (lua_State *L) {
 }
 
 
-/*
-** Create registry table and its predefined values
-*/
+/**
+ ** Create registry table and its predefined values
+ */
 static void init_registry (lua_State *L, global_State *g) {
   TValue temp;
   /* create registry */
@@ -255,11 +255,11 @@ static void init_registry (lua_State *L, global_State *g) {
 }
 
 
-/*
-** open parts of the state that may cause memory-allocation errors.
-** ('g->nilvalue' being a nil value flags that the state was completely
-** build.)
-*/
+/**
+ ** open parts of the state that may cause memory-allocation errors.
+ ** ('g->nilvalue' being a nil value flags that the state was completely
+ ** build.)
+ */
 static void f_luaopen (lua_State *L, void *ud) {
   global_State *g = G(L);
   UNUSED(ud);
@@ -274,10 +274,10 @@ static void f_luaopen (lua_State *L, void *ud) {
 }
 
 
-/*
-** preinitialize a thread with consistent values without allocating
-** any memory (to avoid errors)
-*/
+/**
+ ** preinitialize a thread with consistent values without allocating
+ ** any memory (to avoid errors)
+ */
 static void preinit_thread (lua_State *L, global_State *g) {
   G(L) = g;
   L->stack = NULL;
@@ -443,9 +443,9 @@ void luaE_warning (lua_State *L, const char *msg, int tocont) {
 }
 
 
-/*
-** Generate a warning from an error message
-*/
+/**
+ ** Generate a warning from an error message
+ */
 void luaE_warnerror (lua_State *L, const char *where) {
   TValue *errobj = s2v(L->top - 1);  /* error object */
   const char *msg = (ttisstring(errobj))

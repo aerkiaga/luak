@@ -1,8 +1,8 @@
-/*
-** $Id: ltm.h $
-** Tag methods
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: ltm.h $
+ ** Tag methods
+ ** See Copyright Notice in lua.h
+ */
 
 #ifndef ltm_h
 #define ltm_h
@@ -11,10 +11,10 @@
 #include "lobject.h"
 
 
-/*
+/**
 * WARNING: if you change the order of this enumeration,
 * grep "ORDER TM" and "ORDER OP"
-*/
+ */
 typedef enum {
   TM_INDEX,
   TM_NEWINDEX,
@@ -45,10 +45,10 @@ typedef enum {
 } TMS;
 
 
-/*
-** Test whether there is no tagmethod.
-** (Because tagmethods use raw accesses, the result may be an "empty" nil.)
-*/
+/**
+ ** Test whether there is no tagmethod.
+ ** (Because tagmethods use raw accesses, the result may be an "empty" nil.)
+ */
 #define notm(tm)	ttisnil(tm)
 
 

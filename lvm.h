@@ -1,8 +1,8 @@
-/*
-** $Id: lvm.h $
-** Lua virtual machine
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: lvm.h $
+ ** Lua virtual machine
+ ** See Copyright Notice in lua.h
+ */
 
 #ifndef lvm_h
 #define lvm_h
@@ -27,18 +27,18 @@
 #endif
 
 
-/*
-** You can define LUA_FLOORN2I if you want to convert floats to integers
-** by flooring them (instead of raising an error if they are not
-** integral values)
-*/
+/**
+ ** You can define LUA_FLOORN2I if you want to convert floats to integers
+ ** by flooring them (instead of raising an error if they are not
+ ** integral values)
+ */
 #if !defined(LUA_FLOORN2I)
 #define LUA_FLOORN2I		F2Ieq
 #endif
 
 
-/*
-** Rounding modes for float->integer coercion
+/**
+ ** Rounding modes for float->integer coercion
  */
 typedef enum {
   F2Ieq,  /* no rounding; accepts only integral values */
@@ -47,23 +47,23 @@ typedef enum {
 } F2Imod;
 
 
-/* convert an object to a float (including string coercion) */
+/** convert an object to a float (including string coercion) */
 #define tonumber(o,n) \
 	(ttisfloat(o) ? (*(n) = fltvalue(o), 1) : luaV_tonumber_(o,n))
 
 
-/* convert an object to a float (without string coercion) */
+/** convert an object to a float (without string coercion) */
 #define tonumberns(o,n) \
 	(ttisfloat(o) ? ((n) = fltvalue(o), 1) : \
 	(ttisinteger(o) ? ((n) = cast_num(ivalue(o)), 1) : 0))
 
 
-/* convert an object to an integer (including string coercion) */
+/** convert an object to an integer (including string coercion) */
 #define tointeger(o,i) \
   (ttisinteger(o) ? (*(i) = ivalue(o), 1) : luaV_tointeger(o,i,LUA_FLOORN2I))
 
 
-/* convert an object to an integer (without string coercion) */
+/** convert an object to an integer (without string coercion) */
 #define tointegerns(o,i) \
   (ttisinteger(o) ? (*(i) = ivalue(o), 1) : luaV_tointegerns(o,i,LUA_FLOORN2I))
 
@@ -73,13 +73,13 @@ typedef enum {
 #define luaV_rawequalobj(t1,t2)		luaV_equalobj(NULL,t1,t2)
 
 
-/*
-** fast track for 'gettable': if 't' is a table and 't[k]' is present,
-** return 1 with 'slot' pointing to 't[k]' (position of final result).
-** Otherwise, return 0 (meaning it will have to check metamethod)
-** with 'slot' pointing to an empty 't[k]' (if 't' is a table) or NULL
-** (otherwise). 'f' is the raw get function to use.
-*/
+/**
+ ** fast track for 'gettable': if 't' is a table and 't[k]' is present,
+ ** return 1 with 'slot' pointing to 't[k]' (position of final result).
+ ** Otherwise, return 0 (meaning it will have to check metamethod)
+ ** with 'slot' pointing to an empty 't[k]' (if 't' is a table) or NULL
+ ** (otherwise). 'f' is the raw get function to use.
+ */
 #define luaV_fastget(L,t,k,slot,f) \
   (!ttistable(t)  \
    ? (slot = NULL, 0)  /* not a table; 'slot' is NULL and result is 0 */  \
@@ -87,10 +87,10 @@ typedef enum {
       !isempty(slot)))  /* result not empty? */
 
 
-/*
-** Special case of 'luaV_fastget' for integers, inlining the fast case
-** of 'luaH_getint'.
-*/
+/**
+ ** Special case of 'luaV_fastget' for integers, inlining the fast case
+ ** of 'luaH_getint'.
+ */
 #define luaV_fastgeti(L,t,k,slot) \
   (!ttistable(t)  \
    ? (slot = NULL, 0)  /* not a table; 'slot' is NULL and result is 0 */  \
@@ -99,10 +99,10 @@ typedef enum {
       !isempty(slot)))  /* result not empty? */
 
 
-/*
-** Finish a fast set operation (when fast get succeeds). In that case,
-** 'slot' points to the place to put the value.
-*/
+/**
+ ** Finish a fast set operation (when fast get succeeds). In that case,
+ ** 'slot' points to the place to put the value.
+ */
 #define luaV_finishfastset(L,t,slot,v) \
     { setobj2t(L, cast(TValue *,slot), v); \
       luaC_barrierback(L, gcvalue(t), v); }

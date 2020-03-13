@@ -1,8 +1,8 @@
-/*
-** $Id: lbaselib.c $
-** Basic library
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: lbaselib.c $
+ ** Basic library
+ ** See Copyright Notice in lua.h
+ */
 
 #define lbaselib_c
 #define LUA_LIB
@@ -37,11 +37,11 @@ static int luaB_print (lua_State *L) {
 }
 
 
-/*
-** Creates a warning with all given arguments.
-** Check first for errors; otherwise an error may interrupt
-** the composition of a warning, leaving it unfinished.
-*/
+/**
+ ** Creates a warning with all given arguments.
+ ** Check first for errors; otherwise an error may interrupt
+ ** the composition of a warning, leaving it unfinished.
+ */
 static int luaB_warn (lua_State *L) {
   int n = lua_gettop(L);  /* number of arguments */
   int i;
@@ -275,9 +275,9 @@ static int luaB_pairs (lua_State *L) {
 }
 
 
-/*
-** Traversal function for 'ipairs'
-*/
+/**
+ ** Traversal function for 'ipairs'
+ */
 static int ipairsaux (lua_State *L) {
   lua_Integer i = luaL_checkinteger(L, 2) + 1;
   lua_pushinteger(L, i);
@@ -285,10 +285,10 @@ static int ipairsaux (lua_State *L) {
 }
 
 
-/*
-** 'ipairs' function. Returns 'ipairsaux', given "table", 0.
-** (The given "table" may not be a table.)
-*/
+/**
+ ** 'ipairs' function. Returns 'ipairsaux', given "table", 0.
+ ** (The given "table" may not be a table.)
+ */
 static int luaB_ipairs (lua_State *L) {
   luaL_checkany(L, 1);
   lua_pushcfunction(L, ipairsaux);  /* iteration function */
@@ -324,27 +324,27 @@ static int luaB_loadfile (lua_State *L) {
 }
 
 
-/*
-** {======================================================
-** Generic Read function
-** =======================================================
-*/
+/**
+ ** @{======================================================
+ ** Generic Read function
+ ** =======================================================
+ */
 
 
-/*
-** reserved slot, above all arguments, to hold a copy of the returned
-** string to avoid it being collected while parsed. 'load' has four
-** optional arguments (chunk, source name, mode, and environment).
-*/
+/**
+ ** reserved slot, above all arguments, to hold a copy of the returned
+ ** string to avoid it being collected while parsed. 'load' has four
+ ** optional arguments (chunk, source name, mode, and environment).
+ */
 #define RESERVEDSLOT	5
 
 
-/*
-** Reader for generic 'load' function: 'lua_load' uses the
-** stack for internal stuff, so the reader cannot change the
-** stack top. Instead, it keeps its resulting string in a
-** reserved slot inside the stack.
-*/
+/**
+ ** Reader for generic 'load' function: 'lua_load' uses the
+ ** stack for internal stuff, so the reader cannot change the
+ ** stack top. Instead, it keeps its resulting string in a
+ ** reserved slot inside the stack.
+ */
 static const char *generic_reader (lua_State *L, void *ud, size_t *size) {
   (void)(ud);  /* not used */
   luaL_checkstack(L, 2, "too many nested functions");
@@ -381,7 +381,7 @@ static int luaB_load (lua_State *L) {
   return load_aux(L, status, env);
 }
 
-/* }====================================================== */
+/** @}====================================================== */
 
 
 static int dofilecont (lua_State *L, int d1, lua_KContext d2) {
@@ -429,13 +429,13 @@ static int luaB_select (lua_State *L) {
 }
 
 
-/*
-** Continuation function for 'pcall' and 'xpcall'. Both functions
-** already pushed a 'true' before doing the call, so in case of success
-** 'finishpcall' only has to return everything in the stack minus
-** 'extra' values (where 'extra' is exactly the number of items to be
-** ignored).
-*/
+/**
+ ** Continuation function for 'pcall' and 'xpcall'. Both functions
+ ** already pushed a 'true' before doing the call, so in case of success
+ ** 'finishpcall' only has to return everything in the stack minus
+ ** 'extra' values (where 'extra' is exactly the number of items to be
+ ** ignored).
+ */
 static int finishpcall (lua_State *L, int status, lua_KContext extra) {
   if (status != LUA_OK && status != LUA_YIELD) {  /* error? */
     lua_pushboolean(L, 0);  /* first result (false) */
@@ -457,11 +457,11 @@ static int luaB_pcall (lua_State *L) {
 }
 
 
-/*
-** Do a protected call with error handling. After 'lua_rotate', the
-** stack will have <f, err, true, f, [args...]>; so, the function passes
-** 2 to 'finishpcall' to skip the 2 first values when returning results.
-*/
+/**
+ ** Do a protected call with error handling. After 'lua_rotate', the
+ ** stack will have <f, err, true, f, [args...]>; so, the function passes
+ ** 2 to 'finishpcall' to skip the 2 first values when returning results.
+ */
 static int luaB_xpcall (lua_State *L) {
   int status;
   int n = lua_gettop(L);

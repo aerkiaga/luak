@@ -1,8 +1,8 @@
-/*
-** $Id: lzio.c $
-** Buffered streams
-** See Copyright Notice in lua.h
-*/
+/**
+ ** $Id: lzio.c $
+ ** Buffered streams
+ ** See Copyright Notice in lua.h
+ */
 
 #define lzio_c
 #define LUA_CORE
@@ -44,7 +44,7 @@ void luaZ_init (lua_State *L, ZIO *z, lua_Reader reader, void *data) {
 }
 
 
-/* --------------------------------------------------------------- read --- */
+/** --------------------------------------------------------------- read --- */
 size_t luaZ_read (ZIO *z, void *b, size_t n) {
   while (n) {
     size_t m;
