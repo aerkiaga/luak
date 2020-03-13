@@ -76,7 +76,7 @@ CORE_O=	lapi.o lcode.o lctype.o ldebug.o ldo.o ldump.o lfunc.o lgc.o llex.o \
 	lmem.o lobject.o lopcodes.o lparser.o lstate.o lstring.o ltable.o \
 	ltm.o lundump.o lvm.o lzio.o ltests.o
 AUX_O=	lauxlib.o
-LIB_O=	lbaselib.o ldblib.o ltablib.o lstrlib.o loadlib.o lcorolib.o linit.o
+LIB_O=	lbaselib.o ldblib.o ltablib.o loadlib.o lcorolib.o linit.o
 
 LUA_T=	lua
 LUA_O=	lua.o
