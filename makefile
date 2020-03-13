@@ -81,11 +81,8 @@ LIB_O=	lbaselib.o linit.o
 LUA_T=	lua
 LUA_O=	lua.o
 
-# LUAC_T=	luac
-# LUAC_O=	luac.o print.o
-
-ALL_T= $(CORE_T) $(LUA_T) $(LUAC_T)
-ALL_O= $(CORE_O) $(LUA_O) $(LUAC_O) $(AUX_O) $(LIB_O)
+ALL_T= $(CORE_T) $(LUA_T)
+ALL_O= $(CORE_O) $(LUA_O) $(AUX_O) $(LIB_O)
 ALL_A= $(CORE_T)
 
 all:	$(ALL_T)

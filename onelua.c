@@ -4,7 +4,6 @@
 
 /** default is to build the full interpreter */
 #ifndef MAKE_LIB
-#ifndef MAKE_LUAC
 #ifndef MAKE_LUA
 #define MAKE_LUA
 #endif
@@ -81,7 +80,6 @@
 #include "lauxlib.c"
 
 /** standard library  -- not used by luac */
-#ifndef MAKE_LUAC
 #include "lbaselib.c"
 #include "lcorolib.c"
 #include "ldblib.c"
@@ -93,14 +91,8 @@
 #include "ltablib.c"
 #include "lutf8lib.c"
 #include "linit.c"
-#endif
 
 /** lua */
 #ifdef MAKE_LUA
 #include "lua.c"
-#endif
-
-/** luac */
-#ifdef MAKE_LUAC
-#include "luac.c"
 #endif
